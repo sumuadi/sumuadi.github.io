@@ -7,7 +7,7 @@ import { requireAdmin } from "../_shared/adminAuth.ts";
 import { getServiceClient } from "../_shared/supabaseAdmin.ts";
 
 const PRODUCTS = ["toner", "cream", "serum"];
-const STATUSES = ["none", "winner", "reserve", "verified", "invalidated"];
+const STATUSES = ["none", "winner", "verified", "invalidated"];
 
 Deno.serve(async (req) => {
   const opt = handleOptions(req);

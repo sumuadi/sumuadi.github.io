@@ -50,7 +50,6 @@
   .badge{display:inline-block;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:bold}
   .badge-none{background:#eee;color:#777}
   .badge-winner{background:#fff1c9;color:#a67c00}
-  .badge-reserve{background:#e4eeff;color:#3a5fb0}
   .badge-verified{background:#dff5e3;color:#2f8a4a}
   .badge-invalidated{background:#fde0dd;color:#c14a3f}
   .row-actions{display:flex;gap:6px}
@@ -156,11 +155,10 @@
           <label>당첨 인원</label>
           <input type="number" id="cfg-winner-count" min="0">
         </div>
-        <div class="field">
-          <label>예비 인원</label>
-          <input type="number" id="cfg-reserve-count" min="0">
-        </div>
       </div>
+      <p style="font-size:11.5px;color:#9088a8;margin-bottom:12px">
+        제출 마감은 "발표 ON" 클릭 시 자동으로 오늘로부터 5일 후로 설정됩니다 (필요 시 위에서 직접 수정 가능).
+      </p>
       <button class="btn btn-sm" id="cfg-save-btn">저장</button>
     </div>
 
@@ -205,7 +203,6 @@
             <option value="">전체</option>
             <option value="none">미추첨</option>
             <option value="winner">당첨(검수대기)</option>
-            <option value="reserve">예비</option>
             <option value="verified">검수완료</option>
             <option value="invalidated">무효</option>
           </select>
@@ -225,16 +222,13 @@
     <div class="card">
       <h2>추첨 실행</h2>
       <p style="font-size:12.5px;color:#a68a85;margin-bottom:12px">
-        winner_status가 '미추첨(none)'인 응모 중에서만 추첨합니다. 이미 당첨/예비로 뽑힌 건은 건드리지 않습니다.
+        winner_status가 '미추첨(none)'인 응모 중에서만 추첨합니다. 이미 당첨으로 뽑힌 건은 건드리지 않습니다.
+        예비 당첨자는 없습니다 — 무효 처리된 당첨은 그대로 종료됩니다.
       </p>
       <div class="field-row">
         <div class="field">
           <label>당첨 인원</label>
           <input type="number" id="draw-winner-count" min="0">
-        </div>
-        <div class="field">
-          <label>예비 인원</label>
-          <input type="number" id="draw-reserve-count" min="0">
         </div>
       </div>
       <button class="btn btn-sm" id="draw-run-btn">추첨 실행</button>
@@ -247,10 +241,6 @@
     <div class="card">
       <h2>당첨자 카드 검수 (검수 대기: winner 상태)</h2>
       <div id="review-table-wrap"><div class="empty">읽는 중…</div></div>
-    </div>
-    <div class="card">
-      <h2>예비 당첨자 (승격 대기: reserve 상태)</h2>
-      <div id="reserve-table-wrap"><div class="empty">읽는 중…</div></div>
     </div>
   </section>
 
@@ -388,7 +378,7 @@
   }
 
   var PRODUCT_LABELS = { toner: "토너", cream: "크림", serum: "세럼" };
-  var STATUS_LABELS = { none: "미추첨", winner: "당첨(검수대기)", reserve: "예비", verified: "검수완료", invalidated: "무효" };
+  var STATUS_LABELS = { none: "미추첨", winner: "당첨(검수대기)", verified: "검수완료", invalidated: "무효" };
 
   function badge(status) {
     return '<span class="badge badge-' + status + '">' + (STATUS_LABELS[status] || status) + "</span>";
@@ -445,13 +435,11 @@
       document.getElementById("cfg-announce-at").value = toLocalInputValue(data.announce_at);
       document.getElementById("cfg-submit-deadline").value = toLocalInputValue(data.submit_deadline);
       document.getElementById("cfg-winner-count").value = data.winner_count ?? "";
-      document.getElementById("cfg-reserve-count").value = data.reserve_count ?? "";
       document.getElementById("cfg-announce-status").textContent = data.is_announced ? "발표됨 (ON)" : "발표 전 (OFF)";
       document.getElementById("cfg-announce-toggle-btn").textContent = data.is_announced ? "발표 취소(OFF로 되돌리기)" : "발표 ON";
 
-      // pre-fill draw counts too
+      // pre-fill draw count too
       document.getElementById("draw-winner-count").value = data.winner_count ?? "";
-      document.getElementById("draw-reserve-count").value = data.reserve_count ?? "";
     } catch (err) {
       flash("err", err.message);
     }
@@ -466,7 +454,6 @@
         announce_at: fromLocalInputValue(document.getElementById("cfg-announce-at").value),
         submit_deadline: fromLocalInputValue(document.getElementById("cfg-submit-deadline").value),
         winner_count: document.getElementById("cfg-winner-count").value === "" ? null : parseInt(document.getElementById("cfg-winner-count").value, 10),
-        reserve_count: document.getElementById("cfg-reserve-count").value === "" ? null : parseInt(document.getElementById("cfg-reserve-count").value, 10),
       };
       var res = await adminFetch("/admin-event-config", {
         method: "PATCH",
@@ -613,23 +600,18 @@
   // ---------- draw ----------
   document.getElementById("draw-run-btn").addEventListener("click", async function () {
     var winnerCount = parseInt(document.getElementById("draw-winner-count").value, 10) || 0;
-    var reserveCount = parseInt(document.getElementById("draw-reserve-count").value, 10) || 0;
-    if (!confirm(winnerCount + "명 당첨 + " + reserveCount + "명 예비를 추첨합니다. 계속할까요?")) return;
+    if (!confirm(winnerCount + "명 당첨을 추첨합니다. 계속할까요?")) return;
     try {
       var res = await adminFetch("/admin-draw", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ winner_count: winnerCount, reserve_count: reserveCount }),
+        body: JSON.stringify({ winner_count: winnerCount }),
       });
       var data = await res.json();
       if (!res.ok) throw new Error(data.error || "추첨 실패");
 
       var html = "<h2>당첨 (" + data.winners.length + "명)</h2><table><tbody>";
       data.winners.forEach(function (w) {
-        html += "<tr><td>" + (PRODUCT_LABELS[w.product] || w.product) + "</td><td>No." + w.ball_number + "</td></tr>";
-      });
-      html += "</tbody></table><h2 style='margin-top:14px'>예비 (" + data.reserves.length + "명)</h2><table><tbody>";
-      data.reserves.forEach(function (w) {
         html += "<tr><td>" + (PRODUCT_LABELS[w.product] || w.product) + "</td><td>No." + w.ball_number + "</td></tr>";
       });
       html += "</tbody></table>";
@@ -647,11 +629,6 @@
       var winnerData = await winnerRes.json();
       if (!winnerRes.ok) throw new Error(winnerData.error || "불러오기 실패");
       renderReviewTable(winnerData.rows);
-
-      var reserveRes = await adminFetch("/admin-entries?winner_status=reserve&pageSize=100");
-      var reserveData = await reserveRes.json();
-      if (!reserveRes.ok) throw new Error(reserveData.error || "불러오기 실패");
-      renderReserveTable(reserveData.rows);
     } catch (err) {
       flash("err", err.message);
     }
@@ -702,41 +679,6 @@
     } catch (err) {
       flash("err", err.message);
     }
-  }
-
-  function renderReserveTable(rows) {
-    var wrap = document.getElementById("reserve-table-wrap");
-    if (!rows.length) {
-      wrap.innerHTML = '<div class="empty">예비 당첨자가 없습니다</div>';
-      return;
-    }
-    var html = "<table><thead><tr><th>제품</th><th>번호</th><th>닉네임</th><th>처리</th></tr></thead><tbody>";
-    rows.forEach(function (r) {
-      html += "<tr><td>" + (PRODUCT_LABELS[r.product] || r.product) + "</td><td>No." + r.ball_number + "</td><td>" +
-        escapeHtml(r.participants ? r.participants.display_name : "") +
-        '</td><td><button class="btn btn-sm" data-promote="' + r.id + '">당첨으로 승격</button></td></tr>';
-    });
-    html += "</tbody></table>";
-    wrap.innerHTML = html;
-
-    wrap.querySelectorAll("[data-promote]").forEach(function (btn) {
-      btn.addEventListener("click", async function () {
-        if (!confirm("이 예비 당첨자를 당첨으로 승격할까요?")) return;
-        try {
-          var res = await adminFetch("/admin-promote-reserve", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ entry_id: btn.dataset.promote }),
-          });
-          var data = await res.json();
-          if (!res.ok) throw new Error(data.error || "승격 실패");
-          flash("ok", "승격되었습니다.");
-          loadReview();
-        } catch (err) {
-          flash("err", err.message);
-        }
-      });
-    });
   }
 
   // ---------- shipping export ----------

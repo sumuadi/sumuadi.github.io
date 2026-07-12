@@ -395,9 +395,6 @@ verify_jwt = false
 [functions.admin-review-card]
 verify_jwt = false
 
-[functions.admin-promote-reserve]
-verify_jwt = false
-
 [functions.admin-shipping-export]
 verify_jwt = false
 

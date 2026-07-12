@@ -1,9 +1,9 @@
 // POST /admin-draw
-// body: { winner_count, reserve_count, exclude_entry_ids?, force_winner_entry_ids?, redraw? }
-// Randomly draws winner_count winners + reserve_count reserves from entries with
-// winner_status='none'. Manual override: force_winner_entry_ids are guaranteed winners,
-// exclude_entry_ids are removed from the pool entirely. redraw=true resets any existing
-// winner/reserve entries back to 'none' first (never touches verified/invalidated).
+// body: { winner_count, exclude_entry_ids?, force_winner_entry_ids?, redraw? }
+// Randomly draws winner_count winners from entries with winner_status='none'. Manual override:
+// force_winner_entry_ids are guaranteed winners, exclude_entry_ids are removed from the pool
+// entirely. redraw=true resets any existing winner entries back to 'none' first (never touches
+// verified/invalidated). No reserve tier — an invalidated winner's slot simply ends (정책 확정).
 import { corsHeadersFor, handleOptions } from "../_shared/cors.ts";
 import { json } from "../_shared/http.ts";
 import { requireAdmin } from "../_shared/adminAuth.ts";
@@ -41,7 +41,6 @@ Deno.serve(async (req) => {
 
   let body: {
     winner_count?: number;
-    reserve_count?: number;
     exclude_entry_ids?: string[];
     force_winner_entry_ids?: string[];
     redraw?: boolean;
@@ -53,11 +52,10 @@ Deno.serve(async (req) => {
   }
 
   const winnerCount = body.winner_count ?? 0;
-  const reserveCount = body.reserve_count ?? 0;
   const excludeIds = new Set(body.exclude_entry_ids ?? []);
   const forceIds = body.force_winner_entry_ids ?? [];
 
-  if (!Number.isInteger(winnerCount) || winnerCount < 0 || !Number.isInteger(reserveCount) || reserveCount < 0) {
+  if (!Number.isInteger(winnerCount) || winnerCount < 0) {
     return json({ error: "invalid_counts" }, 400, cors);
   }
 
@@ -67,7 +65,7 @@ Deno.serve(async (req) => {
     const { error: resetError } = await supabase
       .from("entries")
       .update({ winner_status: "none" })
-      .in("winner_status", ["winner", "reserve"]);
+      .eq("winner_status", "winner");
     if (resetError) {
       console.error(resetError);
       return json({ error: "db_error" }, 500, cors);
@@ -95,15 +93,12 @@ Deno.serve(async (req) => {
   }
 
   const rest = shuffle(eligible.filter((e) => !forceIds.includes(e.id)));
-  if (rest.length < remainingWinnersNeeded + reserveCount) {
+  if (rest.length < remainingWinnersNeeded) {
     return json({ error: "not_enough_entries", eligible: eligible.length }, 400, cors);
   }
 
   const winners = forced.concat(rest.slice(0, remainingWinnersNeeded));
-  const reserves = rest.slice(remainingWinnersNeeded, remainingWinnersNeeded + reserveCount);
-
   const winnerIds = winners.map((e) => e.id);
-  const reserveIds = reserves.map((e) => e.id);
 
   if (winnerIds.length > 0) {
     const { error } = await supabase.from("entries").update({ winner_status: "winner" }).in("id", winnerIds);
@@ -112,13 +107,6 @@ Deno.serve(async (req) => {
       return json({ error: "db_error" }, 500, cors);
     }
   }
-  if (reserveIds.length > 0) {
-    const { error } = await supabase.from("entries").update({ winner_status: "reserve" }).in("id", reserveIds);
-    if (error) {
-      console.error(error);
-      return json({ error: "db_error" }, 500, cors);
-    }
-  }
 
-  return json({ winners, reserves }, 200, cors);
+  return json({ winners }, 200, cors);
 });

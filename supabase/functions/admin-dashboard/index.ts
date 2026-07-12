@@ -35,7 +35,6 @@ Deno.serve(async (req) => {
   const byStatus: Record<string, number> = {
     none: 0,
     winner: 0,
-    reserve: 0,
     verified: 0,
     invalidated: 0,
   };

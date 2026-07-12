@@ -12,9 +12,10 @@ const EDITABLE_FIELDS = [
   "announce_at",
   "is_announced",
   "winner_count",
-  "reserve_count",
   "submit_deadline",
 ];
+
+const SUBMIT_WINDOW_DAYS = 5; // 정책 확정: 카드/배송정보 제출 기한 = 발표 후 5일
 
 Deno.serve(async (req) => {
   const opt = handleOptions(req);
@@ -49,6 +50,21 @@ Deno.serve(async (req) => {
     }
     if (Object.keys(update).length === 0) {
       return json({ error: "no_fields" }, 400, cors);
+    }
+
+    // Auto-set the submit deadline to 5 days from now when announcing for the first time,
+    // unless the caller explicitly provided their own submit_deadline in this same request.
+    if (update.is_announced === true && !("submit_deadline" in body)) {
+      const { data: current } = await supabase
+        .from("event_config")
+        .select("is_announced")
+        .eq("id", 1)
+        .single();
+      if (current && !current.is_announced) {
+        const deadline = new Date();
+        deadline.setDate(deadline.getDate() + SUBMIT_WINDOW_DAYS);
+        update.submit_deadline = deadline.toISOString();
+      }
     }
 
     const { data, error } = await supabase
