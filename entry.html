@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>応募フォーム | SUMUADI ガチャイベント</title>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif;
+    min-height:100vh;
+    background:linear-gradient(160deg,#f9d9d3 0%,#f3b8ae 55%,#e8837b 100%);
+    color:#442f2c;padding:28px 20px 60px;display:flex;justify-content:center}
+  .box{max-width:420px;width:100%}
+  .brand{font-size:13px;letter-spacing:5px;font-weight:bold;color:#fff;opacity:.9;
+    text-align:center;margin-bottom:6px}
+  h1{font-size:20px;color:#fff;text-align:center;margin-bottom:22px;
+    text-shadow:0 2px 10px rgba(0,0,0,.1)}
+  .card{background:#fff;border-radius:20px;padding:22px;margin-bottom:16px;
+    box-shadow:0 6px 20px rgba(0,0,0,.08)}
+  label.field-label{display:block;font-size:13px;font-weight:bold;color:#a24b42;
+    margin-bottom:10px}
+  .products{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+  .product{border:2px solid #f1d9d5;border-radius:14px;padding:8px;text-align:center;
+    cursor:pointer;transition:.15s}
+  .product img{width:100%;aspect-ratio:1;object-fit:cover;border-radius:10px;margin-bottom:6px}
+  .product span{font-size:12px;font-weight:bold}
+  .product.selected{border-color:#e8837b;background:#fff3f1}
+  input[type=number],input[type=text]{width:100%;padding:13px 14px;border-radius:12px;
+    border:2px solid #f1d9d5;font-size:16px;margin-top:10px}
+  input:focus{outline:none;border-color:#e8837b}
+  .hint{font-size:11.5px;color:#b98680;margin-top:6px;line-height:1.6}
+  .agree{display:flex;align-items:flex-start;gap:8px;font-size:12.5px;line-height:1.7;
+    color:#6b4b46;margin-top:4px}
+  .agree input{margin-top:3px}
+  .submit{width:100%;background:linear-gradient(160deg,#f3b8ae,#e8837b);color:#fff;
+    font-weight:bold;border:none;border-radius:28px;padding:16px;font-size:16px;
+    box-shadow:0 6px 16px rgba(0,0,0,.12);cursor:pointer;margin-top:6px}
+  .submit:disabled{opacity:.5;cursor:default}
+  .error{background:#fff0ee;color:#c14a3f;font-size:13px;padding:12px 14px;border-radius:10px;
+    margin-bottom:14px;display:none;line-height:1.7}
+  .center-note{text-align:center;color:#fff;font-size:12px;opacity:.85;margin-top:16px;line-height:1.8}
+  .loading{text-align:center;color:#fff;padding:60px 0}
+</style>
+</head>
+<body>
+  <div class="box">
+    <div class="brand">S U M U A D I</div>
+    <h1>ガチャ番号で応募する</h1>
+
+    <div id="loading" class="loading">読み込み中…</div>
+
+    <form id="entry-form" class="hidden" style="display:none">
+      <div id="error-box" class="error"></div>
+
+      <div class="card">
+        <label class="field-label">① 商品を選択</label>
+        <div class="products">
+          <div class="product" data-product="toner" data-max="400">
+            <img src="images/toner.png" alt="アンプルトナー">
+            <span>アンプルトナー</span>
+          </div>
+          <div class="product" data-product="cream" data-max="300">
+            <img src="images/cream.png" alt="クリーム">
+            <span>クリーム</span>
+          </div>
+          <div class="product" data-product="serum" data-max="200">
+            <img src="images/serum.jpg" alt="セラム">
+            <span>セラム</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <label class="field-label" for="ball_number">② ガチャ番号</label>
+        <input type="number" id="ball_number" name="ball_number" inputmode="numeric" placeholder="番号カードに記載の番号" required>
+        <div class="hint" id="range-hint">商品を選択すると入力できる番号の範囲が表示されます</div>
+      </div>
+
+      <div class="card">
+        <label class="field-label" for="display_name">③ お名前（LINE表示名）</label>
+        <input type="text" id="display_name" name="display_name" required maxlength="60">
+      </div>
+
+      <div class="card">
+        <label class="agree">
+          <input type="checkbox" id="agree" required>
+          <span>
+            個人情報の取扱いに同意します。<br>
+            番号カードは当選時の確認に必要です。当選発表まで大切に保管してください。
+          </span>
+        </label>
+      </div>
+
+      <button type="submit" class="submit" id="submit-btn">応募する</button>
+    </form>
+
+    <p class="center-note">ご応募はお一人様1回限りです</p>
+  </div>
+
+  <script src="config.js"></script>
+  <script>
+  (function () {
+    var cfg = window.SUMUADI_CONFIG;
+    var raw = sessionStorage.getItem(cfg.SESSION_STORAGE_KEY);
+    var session = raw ? JSON.parse(raw) : null;
+
+    if (!session || !session.token) {
+      window.location.href = cfg.FUNCTIONS_URL + "/line-login?next=entry";
+      return;
+    }
+
+    document.getElementById("loading").style.display = "none";
+    var form = document.getElementById("entry-form");
+    form.style.display = "block";
+
+    var nameInput = document.getElementById("display_name");
+    if (session.displayName) nameInput.value = session.displayName;
+
+    var selectedProduct = null;
+    var selectedMax = null;
+    var numberInput = document.getElementById("ball_number");
+    var rangeHint = document.getElementById("range-hint");
+
+    document.querySelectorAll(".product").forEach(function (el) {
+      el.addEventListener("click", function () {
+        document.querySelectorAll(".product").forEach(function (p) { p.classList.remove("selected"); });
+        el.classList.add("selected");
+        selectedProduct = el.dataset.product;
+        selectedMax = parseInt(el.dataset.max, 10);
+        numberInput.min = 1;
+        numberInput.max = selectedMax;
+        rangeHint.textContent = "1〜" + selectedMax + " の範囲で入力してください";
+      });
+    });
+
+    var errorBox = document.getElementById("error-box");
+    var ERROR_MESSAGES = {
+      invalid_product: "商品を選択してください。",
+      invalid_ball_number: "番号の形式が正しくありません。範囲をご確認ください。",
+      agreement_required: "個人情報の取扱いへの同意が必要です。",
+      event_not_configured: "現在準備中です。しばらくしてから再度お試しください。",
+      entry_not_started: "応募期間はまだ開始していません。",
+      entry_closed: "応募期間は終了しました。",
+      participant_not_found: "ログイン情報が確認できません。もう一度ログインしてください。",
+      friend_required: "公式LINEの友だち追加が必要です。",
+      already_entered: "すでに応募済みです（お一人様1回限りです）。",
+      number_taken: "その番号はすでに応募されています。番号をご確認ください。",
+      unauthorized: "ログインの有効期限が切れました。もう一度ログインしてください。",
+      db_error: "エラーが発生しました。しばらくしてから再度お試しください。",
+    };
+
+    form.addEventListener("submit", function (e) {
+      e.preventDefault();
+      errorBox.style.display = "none";
+
+      if (!selectedProduct) {
+        errorBox.textContent = ERROR_MESSAGES.invalid_product;
+        errorBox.style.display = "block";
+        return;
+      }
+
+      var ballNumber = parseInt(numberInput.value, 10);
+      var displayName = nameInput.value.trim();
+      var agree = document.getElementById("agree").checked;
+      var submitBtn = document.getElementById("submit-btn");
+      submitBtn.disabled = true;
+
+      fetch(cfg.FUNCTIONS_URL + "/submit-entry", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer " + session.token,
+        },
+        body: JSON.stringify({
+          product: selectedProduct,
+          ball_number: ballNumber,
+          display_name: displayName,
+          agree: agree,
+        }),
+      })
+        .then(function (res) {
+          return res.json().then(function (data) {
+            if (!res.ok) throw data;
+            return data;
+          });
+        })
+        .then(function (data) {
+          sessionStorage.setItem(
+            cfg.ENTRY_STORAGE_KEY,
+            JSON.stringify({ product: data.product, ballNumber: data.ball_number })
+          );
+          window.location.href = "done.html";
+        })
+        .catch(function (err) {
+          var code = err && err.error;
+          errorBox.textContent = ERROR_MESSAGES[code] || ERROR_MESSAGES.db_error;
+          errorBox.style.display = "block";
+          submitBtn.disabled = false;
+
+          if (code === "unauthorized" || code === "participant_not_found") {
+            sessionStorage.removeItem(cfg.SESSION_STORAGE_KEY);
+            setTimeout(function () {
+              window.location.href = cfg.FUNCTIONS_URL + "/line-login?next=entry";
+            }, 1500);
+          }
+        });
+    });
+  })();
+  </script>
+</body>
+</html>

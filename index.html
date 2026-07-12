@@ -18,6 +18,9 @@
   .soon{background:rgba(255,255,255,.92);color:#d96a61;font-weight:bold;
     border-radius:28px;padding:14px 30px;display:inline-block;font-size:16px;
     box-shadow:0 4px 16px rgba(0,0,0,.1)}
+  .cta{background:rgba(255,255,255,.95);color:#d96a61;font-weight:bold;
+    border-radius:28px;padding:16px 32px;display:inline-block;font-size:16px;
+    box-shadow:0 4px 16px rgba(0,0,0,.1);text-decoration:none}
   p{font-size:13.5px;margin-top:22px;line-height:1.9;opacity:.95}
 </style>
 </head>
@@ -26,8 +29,26 @@
     <div class="brand">S U M U A D I</div>
     <h1>POP-UP<br>ガチャイベント</h1>
     <div class="gacha">🎰</div>
-    <div class="soon">COMING SOON</div>
-    <p>イベントページは只今準備中です。<br>公開までもうしばらくお待ちください✨</p>
+    <div id="cta-area">
+      <div class="soon">COMING SOON</div>
+      <p>イベントページは只今準備中です。<br>公開までもうしばらくお待ちください✨</p>
+    </div>
   </div>
+
+  <script>
+  (function () {
+    // Set to the line-login Edge Function URL to go live, e.g.
+    // "https://ezegqkmoysdwgpcwohlv.functions.supabase.co/line-login?next=entry"
+    // Left empty on purpose — flip on only once entry_start/entry_end are configured
+    // and the LINE Login channel is out of "Developing" mode.
+    var ENTRY_URL = "";
+
+    if (ENTRY_URL) {
+      document.getElementById("cta-area").innerHTML =
+        '<a class="cta" href="' + ENTRY_URL + '">LINEでログインして応募する</a>' +
+        '<p>公式LINEの友だち追加が必要です</p>';
+    }
+  })();
+  </script>
 </body>
 </html>
