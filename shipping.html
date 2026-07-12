@@ -8,38 +8,37 @@
   *{margin:0;padding:0;box-sizing:border-box}
   body{font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif;
     min-height:100vh;
-    background:linear-gradient(160deg,#f9d9d3 0%,#f3b8ae 55%,#e8837b 100%);
-    color:#442f2c;padding:28px 20px 60px;display:flex;justify-content:center}
+    background:linear-gradient(160deg,#ddc5fb 0%,#c7a3f5 55%,#9b7ae0 100%);
+    color:#3d3550;padding:28px 20px 60px;display:flex;justify-content:center}
   .box{max-width:440px;width:100%}
-  .brand{font-size:13px;letter-spacing:5px;font-weight:bold;color:#fff;opacity:.9;
-    text-align:center;margin-bottom:6px}
+  .brand-logo{height:14px;filter:brightness(0) invert(1);opacity:.95;margin:0 auto 6px;display:block}
   h1{font-size:19px;color:#fff;text-align:center;margin-bottom:20px;
     text-shadow:0 2px 10px rgba(0,0,0,.1)}
   .loading{text-align:center;color:#fff;padding:60px 0}
   .card{background:#fff;border-radius:20px;padding:22px;margin-bottom:16px;
     box-shadow:0 6px 20px rgba(0,0,0,.08)}
-  .card h2{font-size:14px;color:#a24b42;margin-bottom:12px}
-  .mission{background:#fff3f1;border-radius:14px;padding:16px;font-size:13px;
-    line-height:1.9;color:#8a4b43;margin-bottom:10px}
-  .mission b{color:#d96a61}
+  .card h2{font-size:14px;color:#6b4fa0;margin-bottom:12px}
+  .mission{background:#f5eeff;border-radius:14px;padding:16px;font-size:13px;
+    line-height:1.9;color:#6b4fa0;margin-bottom:10px}
+  .mission b{color:#8a63d6}
   .upload-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:10px}
-  .upload-slot{border:2px dashed #f1d9d5;border-radius:14px;padding:10px;text-align:center;
+  .upload-slot{border:2px dashed #e4d9f9;border-radius:14px;padding:10px;text-align:center;
     cursor:pointer;position:relative;min-height:110px;display:flex;flex-direction:column;
     align-items:center;justify-content:center}
   .upload-slot.done{border-color:#8bc99a;border-style:solid}
   .upload-slot img{max-width:100%;max-height:80px;border-radius:8px;margin-bottom:6px}
-  .upload-slot .label{font-size:12px;color:#a68a85;font-weight:bold}
+  .upload-slot .label{font-size:12px;color:#9088a8;font-weight:bold}
   .upload-slot .status{font-size:11px;color:#2f8a4a;margin-top:4px}
   .upload-slot input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer}
-  label.field-label{display:block;font-size:12.5px;font-weight:bold;color:#a24b42;
+  label.field-label{display:block;font-size:12.5px;font-weight:bold;color:#6b4fa0;
     margin:14px 0 6px}
   label.field-label:first-child{margin-top:0}
   input[type=text],input[type=email],input[type=tel],select{width:100%;padding:12px 13px;
-    border-radius:12px;border:2px solid #f1d9d5;font-size:15px}
-  input:focus,select:focus{outline:none;border-color:#e8837b}
-  .hint{font-size:11px;color:#b98680;margin-top:5px}
+    border-radius:12px;border:2px solid #e4d9f9;font-size:15px}
+  input:focus,select:focus{outline:none;border-color:#9b7ae0}
+  .hint{font-size:11px;color:#9a8bb8;margin-top:5px}
   .two-col{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-  .submit{width:100%;background:linear-gradient(160deg,#f3b8ae,#e8837b);color:#fff;
+  .submit{width:100%;background:linear-gradient(160deg,#a480e6,#9b7ae0);color:#fff;
     font-weight:bold;border:none;border-radius:28px;padding:16px;font-size:16px;
     box-shadow:0 6px 16px rgba(0,0,0,.12);cursor:pointer;margin-top:18px}
   .submit:disabled{opacity:.5;cursor:default}
@@ -52,7 +51,7 @@
 </head>
 <body>
   <div class="box">
-    <div class="brand">S U M U A D I</div>
+    <img class="brand-logo" src="images/logo.png" alt="SUMUADI">
     <h1>配送先情報の入力</h1>
 
     <div id="loading" class="loading">読み込み中…</div>

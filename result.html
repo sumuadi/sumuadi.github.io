@@ -8,11 +8,10 @@
   *{margin:0;padding:0;box-sizing:border-box}
   body{font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif;
     min-height:100vh;
-    background:linear-gradient(160deg,#f9d9d3 0%,#f3b8ae 55%,#e8837b 100%);
-    color:#442f2c;padding:28px 20px 60px;display:flex;justify-content:center}
+    background:linear-gradient(160deg,#ddc5fb 0%,#c7a3f5 55%,#9b7ae0 100%);
+    color:#3d3550;padding:28px 20px 60px;display:flex;justify-content:center}
   .box{max-width:420px;width:100%}
-  .brand{font-size:13px;letter-spacing:5px;font-weight:bold;color:#fff;opacity:.9;
-    text-align:center;margin-bottom:6px}
+  .brand-logo{height:14px;filter:brightness(0) invert(1);opacity:.95;margin:0 auto 6px;display:block}
   h1{font-size:20px;color:#fff;text-align:center;margin-bottom:20px;
     text-shadow:0 2px 10px rgba(0,0,0,.1)}
   .card{background:#fff;border-radius:20px;padding:24px;margin-bottom:16px;
@@ -20,27 +19,27 @@
   .loading{text-align:center;color:#fff;padding:60px 0}
   .icon{font-size:48px;margin-bottom:12px}
   .result-title{font-size:18px;font-weight:bold;margin-bottom:10px}
-  .result-title.win{color:#d96a61}
-  .result-title.lose{color:#8a6a64}
-  .result-summary{background:#fff3f1;border-radius:14px;padding:14px;font-size:16px;
-    font-weight:bold;color:#d96a61;margin:14px 0}
-  .result-desc{font-size:13px;color:#6b4b46;line-height:1.8;margin-bottom:16px}
-  .btn{display:inline-block;background:linear-gradient(160deg,#f3b8ae,#e8837b);color:#fff;
+  .result-title.win{color:#8a63d6}
+  .result-title.lose{color:#79688f}
+  .result-summary{background:#f5eeff;border-radius:14px;padding:14px;font-size:16px;
+    font-weight:bold;color:#8a63d6;margin:14px 0}
+  .result-desc{font-size:13px;color:#6b5a80;line-height:1.8;margin-bottom:16px}
+  .btn{display:inline-block;background:linear-gradient(160deg,#a480e6,#9b7ae0);color:#fff;
     font-weight:bold;border:none;border-radius:28px;padding:14px 28px;font-size:15px;
     text-decoration:none;box-shadow:0 4px 16px rgba(0,0,0,.12);cursor:pointer}
-  .status-note{font-size:12px;color:#a68a85;margin-top:14px;line-height:1.7}
-  .winners-card h2{font-size:14px;color:#a24b42;margin-bottom:12px;text-align:left}
+  .status-note{font-size:12px;color:#9088a8;margin-top:14px;line-height:1.7}
+  .winners-card h2{font-size:14px;color:#6b4fa0;margin-bottom:12px;text-align:left}
   .winners-group{margin-bottom:12px;text-align:left}
-  .winners-group .g-label{font-size:12px;font-weight:bold;color:#8a6a64;margin-bottom:6px}
+  .winners-group .g-label{font-size:12px;font-weight:bold;color:#79688f;margin-bottom:6px}
   .winners-numbers{display:flex;flex-wrap:wrap;gap:6px}
-  .num-chip{background:#fff3f1;color:#d96a61;font-size:12px;font-weight:bold;
+  .num-chip{background:#f5eeff;color:#8a63d6;font-size:12px;font-weight:bold;
     border-radius:10px;padding:5px 10px}
-  .empty{color:#a68a85;font-size:12.5px;text-align:left}
+  .empty{color:#9088a8;font-size:12.5px;text-align:left}
 </style>
 </head>
 <body>
   <div class="box">
-    <div class="brand">S U M U A D I</div>
+    <img class="brand-logo" src="images/logo.png" alt="SUMUADI">
     <h1>当選結果確認</h1>
 
     <div id="loading" class="loading">読み込み中…</div>

@@ -8,33 +8,32 @@
   *{margin:0;padding:0;box-sizing:border-box}
   body{font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif;
     min-height:100vh;
-    background:linear-gradient(160deg,#f9d9d3 0%,#f3b8ae 55%,#e8837b 100%);
-    color:#442f2c;padding:28px 20px 60px;display:flex;justify-content:center}
+    background:linear-gradient(160deg,#ddc5fb 0%,#c7a3f5 55%,#9b7ae0 100%);
+    color:#3d3550;padding:28px 20px 60px;display:flex;justify-content:center}
   .box{max-width:420px;width:100%}
-  .brand{font-size:13px;letter-spacing:5px;font-weight:bold;color:#fff;opacity:.9;
-    text-align:center;margin-bottom:6px}
+  .brand-logo{height:14px;filter:brightness(0) invert(1);opacity:.95;margin:0 auto 6px;display:block}
   h1{font-size:20px;color:#fff;text-align:center;margin-bottom:8px;
     text-shadow:0 2px 10px rgba(0,0,0,.1)}
   .edit-note{text-align:center;color:#fff;font-size:12.5px;opacity:.9;margin-bottom:18px;
     background:rgba(0,0,0,.12);border-radius:10px;padding:8px 12px;display:none}
   .card{background:#fff;border-radius:20px;padding:22px;margin-bottom:16px;
     box-shadow:0 6px 20px rgba(0,0,0,.08)}
-  label.field-label{display:block;font-size:13px;font-weight:bold;color:#a24b42;
+  label.field-label{display:block;font-size:13px;font-weight:bold;color:#6b4fa0;
     margin-bottom:10px}
   .products{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
-  .product{border:2px solid #f1d9d5;border-radius:14px;padding:8px;text-align:center;
+  .product{border:2px solid #e4d9f9;border-radius:14px;padding:8px;text-align:center;
     cursor:pointer;transition:.15s}
   .product img{width:100%;aspect-ratio:1;object-fit:cover;border-radius:10px;margin-bottom:6px}
   .product span{font-size:12px;font-weight:bold}
-  .product.selected{border-color:#e8837b;background:#fff3f1}
+  .product.selected{border-color:#9b7ae0;background:#f5eeff}
   input[type=number],input[type=text]{width:100%;padding:13px 14px;border-radius:12px;
-    border:2px solid #f1d9d5;font-size:16px;margin-top:10px}
-  input:focus{outline:none;border-color:#e8837b}
-  .hint{font-size:11.5px;color:#b98680;margin-top:6px;line-height:1.6}
+    border:2px solid #e4d9f9;font-size:16px;margin-top:10px}
+  input:focus{outline:none;border-color:#9b7ae0}
+  .hint{font-size:11.5px;color:#9a8bb8;margin-top:6px;line-height:1.6}
   .agree{display:flex;align-items:flex-start;gap:8px;font-size:12.5px;line-height:1.7;
-    color:#6b4b46;margin-top:4px}
+    color:#6b5a80;margin-top:4px}
   .agree input{margin-top:3px}
-  .submit{width:100%;background:linear-gradient(160deg,#f3b8ae,#e8837b);color:#fff;
+  .submit{width:100%;background:linear-gradient(160deg,#a480e6,#9b7ae0);color:#fff;
     font-weight:bold;border:none;border-radius:28px;padding:16px;font-size:16px;
     box-shadow:0 6px 16px rgba(0,0,0,.12);cursor:pointer;margin-top:6px}
   .submit:disabled{opacity:.5;cursor:default}
@@ -48,19 +47,19 @@
   .modal-overlay.show{display:flex}
   .modal{background:#fff;border-radius:20px;padding:26px 22px;max-width:340px;width:100%;
     text-align:center}
-  .modal h2{font-size:16px;color:#a24b42;margin-bottom:16px}
-  .modal .confirm-summary{background:#fff3f1;border-radius:14px;padding:16px;font-size:18px;
-    font-weight:bold;color:#d96a61;margin-bottom:14px}
-  .modal p{font-size:12.5px;color:#6b4b46;line-height:1.8;margin-bottom:18px}
+  .modal h2{font-size:16px;color:#6b4fa0;margin-bottom:16px}
+  .modal .confirm-summary{background:#f5eeff;border-radius:14px;padding:16px;font-size:18px;
+    font-weight:bold;color:#8a63d6;margin-bottom:14px}
+  .modal p{font-size:12.5px;color:#6b5a80;line-height:1.8;margin-bottom:18px}
   .modal-actions{display:flex;flex-direction:column;gap:8px}
   .modal-actions .submit{margin-top:0}
-  .modal-actions .cancel{background:#fff;color:#a68a85;border:1.5px solid #eaddda;
+  .modal-actions .cancel{background:#fff;color:#9088a8;border:1.5px solid #e0d6f5;
     border-radius:28px;padding:14px;font-size:14px;cursor:pointer}
 </style>
 </head>
 <body>
   <div class="box">
-    <div class="brand">S U M U A D I</div>
+    <img class="brand-logo" src="images/logo.png" alt="SUMUADI">
     <h1 id="page-title">ガチャ番号で応募する</h1>
     <div class="edit-note" id="edit-note">すでに応募済みです。内容を修正できます。</div>
 
