@@ -169,8 +169,19 @@
       <p style="font-size:13px;color:#6b4b46;margin-bottom:12px" id="cfg-announce-status">-</p>
       <button class="btn btn-sm" id="cfg-announce-toggle-btn">발표 ON</button>
       <p style="font-size:11.5px;color:#a68a85;margin-top:10px">
-        발표 ON 시 /result 페이지가 활성화됩니다 (Phase 3). LINE 알림 발송은 Phase 3에서 별도 처리됩니다.
+        발표 ON 시 result.html이 활성화되어 참여자가 결과를 조회할 수 있습니다. (LINE 메시지는 발송되지 않음)
       </p>
+    </div>
+
+    <div class="card">
+      <h2>LINE 알림 발송</h2>
+      <p style="font-size:12.5px;color:#a68a85;margin-bottom:12px">
+        당첨자(winner 상태) 전원에게 개별 당첨 안내 push를 보내고, 공식 계정 전체 친구에게 발표 공지를 broadcast합니다.
+        <strong style="color:#c14a3f">실제 LINE 메시지가 발송되며 되돌릴 수 없습니다. 발표 ON 상태에서만 가능합니다.</strong>
+        같은 버튼을 두 번 누르면 아직 검수 전인 당첨자에게 중복 발송될 수 있으니 주의하세요.
+      </p>
+      <button class="btn btn-sm btn-ghost" id="send-announcement-btn">당첨자 알림 + 전체 공지 발송</button>
+      <div id="announcement-result" style="margin-top:12px;font-size:12.5px;color:#6b4b46"></div>
     </div>
   </section>
 
@@ -248,9 +259,10 @@
     <div class="card">
       <h2>배송 정보</h2>
       <p style="font-size:12.5px;color:#a68a85;margin-bottom:14px">
-        당첨자가 배송 정보를 제출하면(Phase 3) 여기서 CSV로 내려받아 EMS 라벨 작성에 사용합니다.
+        당첨자가 제출한 배송 정보 목록입니다. CSV로 내려받아 EMS 라벨 작성에 사용하거나, 발송 후 여기서 발송완료 처리하세요.
       </p>
       <a class="btn btn-sm" id="shipping-export-btn" style="display:inline-block;text-decoration:none;text-align:center">CSV 다운로드</a>
+      <div id="shipping-table-wrap" style="margin-top:16px"><div class="empty">읽는 중…</div></div>
     </div>
   </section>
 </div>
@@ -362,6 +374,7 @@
       if (btn.dataset.panel === "config") loadConfig();
       if (btn.dataset.panel === "entries") loadEntries();
       if (btn.dataset.panel === "review") loadReview();
+      if (btn.dataset.panel === "shipping") loadShippingList();
     });
   });
 
@@ -743,6 +756,75 @@
       a.click();
       URL.revokeObjectURL(url);
     } catch (err) {
+      flash("err", err.message);
+    }
+  });
+
+  // ---------- shipping list ----------
+  async function loadShippingList() {
+    try {
+      var res = await adminFetch("/admin-shipping-list");
+      var data = await res.json();
+      if (!res.ok) throw new Error(data.error || "불러오기 실패");
+
+      var wrap = document.getElementById("shipping-table-wrap");
+      if (!data.rows.length) {
+        wrap.innerHTML = '<div class="empty">제출된 배송 정보가 없습니다</div>';
+        return;
+      }
+
+      var html = "<table><thead><tr><th>제품</th><th>번호</th><th>수령인</th><th>주소</th><th>전화</th><th>발송상태</th><th>관리</th></tr></thead><tbody>";
+      data.rows.forEach(function (r) {
+        var entry = r.entries || {};
+        var addr = (r.postal_code || "") + " " + (r.prefecture || "") + (r.city || "") + (r.address_line || "");
+        html += "<tr><td>" + (PRODUCT_LABELS[entry.product] || entry.product || "") + "</td><td>No." +
+          (entry.ball_number ?? "") + "</td><td>" + escapeHtml(r.name_kanji) + "</td><td style='font-size:11.5px'>" +
+          escapeHtml(addr) + "</td><td>" + escapeHtml(r.phone) + "</td><td>" +
+          (r.is_shipped ? '<span class="badge badge-verified">발송완료' + (r.tracking_number ? " (" + escapeHtml(r.tracking_number) + ")" : "") + '</span>' : '<span class="badge badge-none">미발송</span>') +
+          '</td><td>' + (r.is_shipped ? "-" : '<button class="btn btn-sm" data-ship="' + r.entry_id + '">발송완료 처리</button>') + '</td></tr>';
+      });
+      html += "</tbody></table>";
+      wrap.innerHTML = html;
+
+      wrap.querySelectorAll("[data-ship]").forEach(function (btn) {
+        btn.addEventListener("click", async function () {
+          var tracking = prompt("추적번호를 입력하세요 (입력 시 발송완료 LINE 알림이 발송됩니다. 비워두면 알림 없이 처리)");
+          if (tracking === null) return;
+          try {
+            var res2 = await adminFetch("/admin-mark-shipped", {
+              method: "PATCH",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ entry_id: btn.dataset.ship, tracking_number: tracking || undefined }),
+            });
+            var data2 = await res2.json();
+            if (!res2.ok) throw new Error(data2.error || "처리 실패");
+            flash("ok", "발송완료 처리되었습니다.");
+            loadShippingList();
+          } catch (err) {
+            flash("err", err.message);
+          }
+        });
+      });
+    } catch (err) {
+      flash("err", err.message);
+    }
+  }
+
+  // ---------- announcement push ----------
+  document.getElementById("send-announcement-btn").addEventListener("click", async function () {
+    if (!confirm("당첨자 전원에게 개별 LINE 알림을 보내고, 공식 계정 전체 친구에게 발표 공지를 broadcast합니다.\n실제 메시지가 발송되며 되돌릴 수 없습니다. 계속할까요?")) return;
+    var resultEl = document.getElementById("announcement-result");
+    resultEl.textContent = "발송 중…";
+    try {
+      var res = await adminFetch("/admin-send-announcement", { method: "POST" });
+      var data = await res.json();
+      if (!res.ok) throw new Error(data.error === "not_announced_yet" ? "먼저 '발표 ON'을 눌러주세요." : (data.error || "발송 실패"));
+      resultEl.textContent = "당첨자 알림 " + data.winner_push_sent + "건 발송" +
+        (data.winner_push_failed.length ? " (실패 " + data.winner_push_failed.length + "건)" : "") +
+        " / 전체 공지 " + (data.broadcast_sent ? "발송 완료" : "발송 실패");
+      flash("ok", "알림 발송을 시도했습니다.");
+    } catch (err) {
+      resultEl.textContent = "";
       flash("err", err.message);
     }
   });

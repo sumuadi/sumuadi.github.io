@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>配送先情報の入力 | SUMUADI ガチャイベント</title>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif;
+    min-height:100vh;
+    background:linear-gradient(160deg,#f9d9d3 0%,#f3b8ae 55%,#e8837b 100%);
+    color:#442f2c;padding:28px 20px 60px;display:flex;justify-content:center}
+  .box{max-width:440px;width:100%}
+  .brand{font-size:13px;letter-spacing:5px;font-weight:bold;color:#fff;opacity:.9;
+    text-align:center;margin-bottom:6px}
+  h1{font-size:19px;color:#fff;text-align:center;margin-bottom:20px;
+    text-shadow:0 2px 10px rgba(0,0,0,.1)}
+  .loading{text-align:center;color:#fff;padding:60px 0}
+  .card{background:#fff;border-radius:20px;padding:22px;margin-bottom:16px;
+    box-shadow:0 6px 20px rgba(0,0,0,.08)}
+  .card h2{font-size:14px;color:#a24b42;margin-bottom:12px}
+  .mission{background:#fff3f1;border-radius:14px;padding:16px;font-size:13px;
+    line-height:1.9;color:#8a4b43;margin-bottom:10px}
+  .mission b{color:#d96a61}
+  .upload-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:10px}
+  .upload-slot{border:2px dashed #f1d9d5;border-radius:14px;padding:10px;text-align:center;
+    cursor:pointer;position:relative;min-height:110px;display:flex;flex-direction:column;
+    align-items:center;justify-content:center}
+  .upload-slot.done{border-color:#8bc99a;border-style:solid}
+  .upload-slot img{max-width:100%;max-height:80px;border-radius:8px;margin-bottom:6px}
+  .upload-slot .label{font-size:12px;color:#a68a85;font-weight:bold}
+  .upload-slot .status{font-size:11px;color:#2f8a4a;margin-top:4px}
+  .upload-slot input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer}
+  label.field-label{display:block;font-size:12.5px;font-weight:bold;color:#a24b42;
+    margin:14px 0 6px}
+  label.field-label:first-child{margin-top:0}
+  input[type=text],input[type=email],input[type=tel],select{width:100%;padding:12px 13px;
+    border-radius:12px;border:2px solid #f1d9d5;font-size:15px}
+  input:focus,select:focus{outline:none;border-color:#e8837b}
+  .hint{font-size:11px;color:#b98680;margin-top:5px}
+  .two-col{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .submit{width:100%;background:linear-gradient(160deg,#f3b8ae,#e8837b);color:#fff;
+    font-weight:bold;border:none;border-radius:28px;padding:16px;font-size:16px;
+    box-shadow:0 6px 16px rgba(0,0,0,.12);cursor:pointer;margin-top:18px}
+  .submit:disabled{opacity:.5;cursor:default}
+  .error{background:#fff0ee;color:#c14a3f;font-size:13px;padding:12px 14px;border-radius:10px;
+    margin-bottom:14px;display:none;line-height:1.7}
+  .ok-msg{background:#dff5e3;color:#2f8a4a;font-size:13px;padding:12px 14px;border-radius:10px;
+    margin-bottom:14px;display:none;line-height:1.7}
+  .back-link{display:block;text-align:center;color:#fff;font-size:12.5px;margin-top:16px;opacity:.9}
+</style>
+</head>
+<body>
+  <div class="box">
+    <div class="brand">S U M U A D I</div>
+    <h1>配送先情報の入力</h1>
+
+    <div id="loading" class="loading">読み込み中…</div>
+
+    <form id="shipping-form" class="hidden" style="display:none">
+      <div id="error-box" class="error"></div>
+      <div id="ok-box" class="ok-msg">配送先情報を受け付けました。内容は下記より修正できます。</div>
+
+      <div class="card">
+        <h2>① 番号カードの写真</h2>
+        <div class="mission" id="mission-box">
+          手書きで「<b>LINEニックネーム＋スムアディ</b>」と書いたメモを、番号カードの横に置いて撮影してください。
+        </div>
+        <div class="upload-row">
+          <div class="upload-slot" id="slot-front">
+            <div class="label">表面</div>
+            <input type="file" accept="image/*" id="file-front">
+          </div>
+          <div class="upload-slot" id="slot-back">
+            <div class="label">裏面</div>
+            <input type="file" accept="image/*" id="file-back">
+          </div>
+        </div>
+        <div class="hint">番号がはっきり見えるように撮影してください</div>
+      </div>
+
+      <div class="card">
+        <h2>② 配送先情報（EMS国際発送）</h2>
+
+        <label class="field-label" for="name_kanji">お名前（漢字）</label>
+        <input type="text" id="name_kanji" required>
+
+        <label class="field-label" for="name_romaji">お名前（ローマ字）</label>
+        <input type="text" id="name_romaji" placeholder="YAMADA TARO" required>
+
+        <label class="field-label" for="postal_code">郵便番号</label>
+        <input type="text" id="postal_code" placeholder="123-4567" inputmode="numeric" required>
+        <div class="hint" id="zip-hint"></div>
+
+        <label class="field-label" for="prefecture">都道府県</label>
+        <select id="prefecture" required></select>
+
+        <label class="field-label" for="city">市区町村</label>
+        <input type="text" id="city" required>
+
+        <label class="field-label" for="address_line">番地</label>
+        <input type="text" id="address_line" required>
+
+        <label class="field-label" for="building">建物名・部屋番号（任意）</label>
+        <input type="text" id="building">
+
+        <div class="two-col">
+          <div>
+            <label class="field-label" for="phone">電話番号</label>
+            <input type="tel" id="phone" required>
+          </div>
+          <div>
+            <label class="field-label" for="email">メール（任意）</label>
+            <input type="email" id="email">
+          </div>
+        </div>
+      </div>
+
+      <button type="submit" class="submit" id="submit-btn">配送先情報を送信する</button>
+    </form>
+
+    <a class="back-link" href="result.html">結果ページに戻る</a>
+  </div>
+
+  <script src="config.js"></script>
+  <script>
+  (function () {
+    var cfg = window.SUMUADI_CONFIG;
+    var raw = sessionStorage.getItem(cfg.SESSION_STORAGE_KEY);
+    var session = raw ? JSON.parse(raw) : null;
+
+    if (!session || !session.token) {
+      window.location.href = cfg.FUNCTIONS_URL + "/line-login?next=result";
+      return;
+    }
+
+    var PREFECTURES = ["北海道","青森県","岩手県","宮城県","秋田県","山形県","福島県","茨城県","栃木県","群馬県",
+      "埼玉県","千葉県","東京都","神奈川県","新潟県","富山県","石川県","福井県","山梨県","長野県",
+      "岐阜県","静岡県","愛知県","三重県","滋賀県","京都府","大阪府","兵庫県","奈良県","和歌山県",
+      "鳥取県","島根県","岡山県","広島県","山口県","徳島県","香川県","愛媛県","高知県","福岡県",
+      "佐賀県","長崎県","熊本県","大分県","宮崎県","鹿児島県","沖縄県"];
+    var prefSelect = document.getElementById("prefecture");
+    prefSelect.innerHTML = '<option value="">選択してください</option>' +
+      PREFECTURES.map(function (p) { return '<option value="' + p + '">' + p + '</option>'; }).join("");
+
+    var uploadedFront = null;
+    var uploadedBack = null;
+
+    function setupUploadSlot(side, fileInputId, slotId, existingPath) {
+      var slot = document.getElementById(slotId);
+      var input = document.getElementById(fileInputId);
+
+      if (existingPath) {
+        markSlotDone(slot, null);
+        if (side === "front") uploadedFront = existingPath;
+        else uploadedBack = existingPath;
+      }
+
+      input.addEventListener("change", function () {
+        var file = input.files[0];
+        if (!file) return;
+        var ext = (file.name.split(".").pop() || "jpg").toLowerCase();
+        slot.querySelector(".label").textContent = "アップロード中…";
+
+        fetch(cfg.FUNCTIONS_URL + "/card-upload-url", {
+          method: "POST",
+          headers: { "Content-Type": "application/json", Authorization: "Bearer " + session.token },
+          body: JSON.stringify({ side: side, ext: ext }),
+        })
+          .then(function (res) { return res.json(); })
+          .then(function (data) {
+            if (!data.signed_url) throw new Error("upload_url_failed");
+            return fetch(data.signed_url, {
+              method: "PUT",
+              headers: { "Content-Type": file.type || "image/jpeg" },
+              body: file,
+            }).then(function (putRes) {
+              if (!putRes.ok) throw new Error("upload_failed");
+              return data.path;
+            });
+          })
+          .then(function (path) {
+            if (side === "front") uploadedFront = path;
+            else uploadedBack = path;
+            var reader = new FileReader();
+            reader.onload = function () { markSlotDone(slot, reader.result); };
+            reader.readAsDataURL(file);
+          })
+          .catch(function (err) {
+            console.error(err);
+            slot.querySelector(".label").textContent = side === "front" ? "表面" : "裏面";
+            showError("写真のアップロードに失敗しました。もう一度お試しください。");
+          });
+      });
+    }
+
+    function markSlotDone(slot, dataUrl) {
+      slot.classList.add("done");
+      var img = dataUrl ? '<img src="' + dataUrl + '">' : "";
+      slot.querySelector(".label").insertAdjacentHTML("beforebegin", img);
+      slot.querySelector(".label").textContent = "アップロード完了";
+      var status = document.createElement("div");
+      status.className = "status";
+      status.textContent = "✓";
+      slot.appendChild(status);
+    }
+
+    var errorBox = document.getElementById("error-box");
+    var okBox = document.getElementById("ok-box");
+    function showError(msg) {
+      errorBox.textContent = msg;
+      errorBox.style.display = "block";
+      okBox.style.display = "none";
+    }
+
+    var ERROR_MESSAGES = {
+      missing_field: "未入力の項目があります。",
+      submit_deadline_passed: "提出期限を過ぎたため、送信できません。公式LINEまでお問い合わせください。",
+      not_a_winner: "この操作は当選者のみ行えます。",
+      invalid_photo_path: "写真を再アップロードしてください。",
+      unauthorized: "ログインの有効期限が切れました。もう一度ログインしてください。",
+      entry_not_found: "応募内容が見つかりません。",
+      db_error: "エラーが発生しました。しばらくしてから再度お試しください。",
+    };
+
+    // ---- load existing state ----
+    fetch(cfg.FUNCTIONS_URL + "/my-result", {
+      headers: { Authorization: "Bearer " + session.token },
+    })
+      .then(function (res) { return res.json(); })
+      .then(function (data) {
+        if (!data.entry || (data.entry.winner_status !== "winner" && data.entry.winner_status !== "verified")) {
+          window.location.href = "result.html";
+          return;
+        }
+
+        document.getElementById("loading").style.display = "none";
+        var form = document.getElementById("shipping-form");
+        form.style.display = "block";
+
+        setupUploadSlot("front", "file-front", "slot-front", data.entry.card_photo_front);
+        setupUploadSlot("back", "file-back", "slot-back", data.entry.card_photo_back);
+
+        if (data.shipping) {
+          okBox.style.display = "block";
+          document.getElementById("name_kanji").value = data.shipping.name_kanji || "";
+          document.getElementById("name_romaji").value = data.shipping.name_romaji || "";
+          document.getElementById("postal_code").value = data.shipping.postal_code || "";
+          document.getElementById("prefecture").value = data.shipping.prefecture || "";
+          document.getElementById("city").value = data.shipping.city || "";
+          document.getElementById("address_line").value = data.shipping.address_line || "";
+          document.getElementById("building").value = data.shipping.building || "";
+          document.getElementById("phone").value = data.shipping.phone || "";
+          document.getElementById("email").value = data.shipping.email || "";
+        }
+      })
+      .catch(function (err) {
+        console.error(err);
+        window.location.href = "result.html";
+      });
+
+    // ---- zipcloud postal code auto-complete (best-effort, non-blocking) ----
+    var zipHint = document.getElementById("zip-hint");
+    document.getElementById("postal_code").addEventListener("blur", function () {
+      var digits = this.value.replace(/[^0-9]/g, "");
+      if (digits.length !== 7) return;
+      zipHint.textContent = "住所を検索中…";
+      fetch("https://zipcloud.ibsnet.co.jp/api/search?zipcode=" + digits)
+        .then(function (res) { return res.json(); })
+        .then(function (data) {
+          if (data.status === 200 && data.results && data.results[0]) {
+            var r = data.results[0];
+            document.getElementById("prefecture").value = r.address1;
+            document.getElementById("city").value = r.address2;
+            var addrEl = document.getElementById("address_line");
+            if (!addrEl.value) addrEl.value = r.address3;
+            zipHint.textContent = "";
+          } else {
+            zipHint.textContent = "該当する住所が見つかりませんでした。手動で入力してください。";
+          }
+        })
+        .catch(function () {
+          zipHint.textContent = "";
+        });
+    });
+
+    // ---- submit ----
+    document.getElementById("shipping-form").addEventListener("submit", function (e) {
+      e.preventDefault();
+      errorBox.style.display = "none";
+
+      if (!uploadedFront || !uploadedBack) {
+        showError("番号カードの表面・裏面の写真をアップロードしてください。");
+        return;
+      }
+
+      var submitBtn = document.getElementById("submit-btn");
+      submitBtn.disabled = true;
+
+      fetch(cfg.FUNCTIONS_URL + "/submit-shipping", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: "Bearer " + session.token },
+        body: JSON.stringify({
+          name_kanji: document.getElementById("name_kanji").value.trim(),
+          name_romaji: document.getElementById("name_romaji").value.trim(),
+          postal_code: document.getElementById("postal_code").value.trim(),
+          prefecture: document.getElementById("prefecture").value,
+          city: document.getElementById("city").value.trim(),
+          address_line: document.getElementById("address_line").value.trim(),
+          building: document.getElementById("building").value.trim(),
+          phone: document.getElementById("phone").value.trim(),
+          email: document.getElementById("email").value.trim(),
+          card_photo_front: uploadedFront,
+          card_photo_back: uploadedBack,
+        }),
+      })
+        .then(function (res) {
+          return res.json().then(function (data) {
+            if (!res.ok) throw data;
+            return data;
+          });
+        })
+        .then(function () {
+          okBox.style.display = "block";
+          window.scrollTo({ top: 0, behavior: "smooth" });
+        })
+        .catch(function (err) {
+          showError(ERROR_MESSAGES[err && err.error] || ERROR_MESSAGES.db_error);
+        })
+        .finally(function () {
+          submitBtn.disabled = false;
+        });
+    });
+  })();
+  </script>
+</body>
+</html>

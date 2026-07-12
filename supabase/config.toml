@@ -404,6 +404,24 @@ verify_jwt = false
 [functions.admin-edit-entry]
 verify_jwt = false
 
+[functions.my-result]
+verify_jwt = false
+
+[functions.card-upload-url]
+verify_jwt = false
+
+[functions.submit-shipping]
+verify_jwt = false
+
+[functions.admin-send-announcement]
+verify_jwt = false
+
+[functions.admin-mark-shipped]
+verify_jwt = false
+
+[functions.admin-shipping-list]
+verify_jwt = false
+
 [edge_runtime]
 enabled = true
 # Supported request policies: `oneshot`, `per_worker`.

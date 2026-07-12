@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>当選結果確認 | SUMUADI ガチャイベント</title>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif;
+    min-height:100vh;
+    background:linear-gradient(160deg,#f9d9d3 0%,#f3b8ae 55%,#e8837b 100%);
+    color:#442f2c;padding:28px 20px 60px;display:flex;justify-content:center}
+  .box{max-width:420px;width:100%}
+  .brand{font-size:13px;letter-spacing:5px;font-weight:bold;color:#fff;opacity:.9;
+    text-align:center;margin-bottom:6px}
+  h1{font-size:20px;color:#fff;text-align:center;margin-bottom:20px;
+    text-shadow:0 2px 10px rgba(0,0,0,.1)}
+  .card{background:#fff;border-radius:20px;padding:24px;margin-bottom:16px;
+    box-shadow:0 6px 20px rgba(0,0,0,.08);text-align:center}
+  .loading{text-align:center;color:#fff;padding:60px 0}
+  .icon{font-size:48px;margin-bottom:12px}
+  .result-title{font-size:18px;font-weight:bold;margin-bottom:10px}
+  .result-title.win{color:#d96a61}
+  .result-title.lose{color:#8a6a64}
+  .result-summary{background:#fff3f1;border-radius:14px;padding:14px;font-size:16px;
+    font-weight:bold;color:#d96a61;margin:14px 0}
+  .result-desc{font-size:13px;color:#6b4b46;line-height:1.8;margin-bottom:16px}
+  .btn{display:inline-block;background:linear-gradient(160deg,#f3b8ae,#e8837b);color:#fff;
+    font-weight:bold;border:none;border-radius:28px;padding:14px 28px;font-size:15px;
+    text-decoration:none;box-shadow:0 4px 16px rgba(0,0,0,.12);cursor:pointer}
+  .status-note{font-size:12px;color:#a68a85;margin-top:14px;line-height:1.7}
+  .winners-card h2{font-size:14px;color:#a24b42;margin-bottom:12px;text-align:left}
+  .winners-group{margin-bottom:12px;text-align:left}
+  .winners-group .g-label{font-size:12px;font-weight:bold;color:#8a6a64;margin-bottom:6px}
+  .winners-numbers{display:flex;flex-wrap:wrap;gap:6px}
+  .num-chip{background:#fff3f1;color:#d96a61;font-size:12px;font-weight:bold;
+    border-radius:10px;padding:5px 10px}
+  .empty{color:#a68a85;font-size:12.5px;text-align:left}
+</style>
+</head>
+<body>
+  <div class="box">
+    <div class="brand">S U M U A D I</div>
+    <h1>当選結果確認</h1>
+
+    <div id="loading" class="loading">読み込み中…</div>
+
+    <div id="result-area" class="hidden" style="display:none"></div>
+
+    <div class="card winners-card hidden" id="winners-card" style="display:none">
+      <h2>当選番号一覧</h2>
+      <div id="winners-list"></div>
+    </div>
+  </div>
+
+  <script src="config.js"></script>
+  <script>
+  (function () {
+    var cfg = window.SUMUADI_CONFIG;
+    var raw = sessionStorage.getItem(cfg.SESSION_STORAGE_KEY);
+    var session = raw ? JSON.parse(raw) : null;
+
+    if (!session || !session.token) {
+      window.location.href = cfg.FUNCTIONS_URL + "/line-login?next=result";
+      return;
+    }
+
+    var PRODUCT_LABELS = { toner: "アンプルトナー", cream: "クリーム", serum: "セラム" };
+
+    fetch(cfg.FUNCTIONS_URL + "/my-result", {
+      headers: { Authorization: "Bearer " + session.token },
+    })
+      .then(function (res) {
+        return res.json().then(function (data) {
+          if (!res.ok) throw data;
+          return data;
+        });
+      })
+      .then(function (data) {
+        document.getElementById("loading").style.display = "none";
+        renderResult(data);
+      })
+      .catch(function (err) {
+        document.getElementById("loading").style.display = "none";
+        var code = err && err.error;
+        if (code === "unauthorized" || code === "participant_not_found") {
+          sessionStorage.removeItem(cfg.SESSION_STORAGE_KEY);
+          window.location.href = cfg.FUNCTIONS_URL + "/line-login?next=result";
+          return;
+        }
+        var area = document.getElementById("result-area");
+        area.style.display = "block";
+        area.innerHTML = '<div class="card"><div class="icon">⚠️</div><p class="result-desc">エラーが発生しました。時間をおいて再度お試しください。</p></div>';
+      });
+
+    function formatDateJP(iso) {
+      if (!iso) return "";
+      var d = new Date(iso);
+      return (d.getMonth() + 1) + "月" + d.getDate() + "日";
+    }
+
+    function renderResult(data) {
+      var area = document.getElementById("result-area");
+      area.style.display = "block";
+
+      if (!data.is_announced) {
+        area.innerHTML =
+          '<div class="card"><div class="icon">🕊️</div>' +
+          '<div class="result-title lose">発表前です</div>' +
+          '<p class="result-desc">当選発表は' + (formatDateJP(data.announce_at) || "後日") + 'を予定しています。<br>発表日にこのページで結果をご確認ください。</p></div>';
+        return;
+      }
+
+      if (!data.entry) {
+        area.innerHTML =
+          '<div class="card"><div class="icon">🔍</div>' +
+          '<div class="result-title lose">応募内容が見つかりません</div>' +
+          '<p class="result-desc">ご応募履歴が確認できませんでした。<br>心当たりがない場合は公式LINEまでお問い合わせください。</p></div>';
+        renderWinners(data.winners);
+        return;
+      }
+
+      var summary = PRODUCT_LABELS[data.entry.product] + " No." + data.entry.ball_number;
+      var status = data.entry.winner_status;
+
+      if (status === "winner" || status === "verified") {
+        var html =
+          '<div class="card"><div class="icon">🎉</div>' +
+          '<div class="result-title win">当選おめでとうございます！</div>' +
+          '<div class="result-summary">' + summary + '</div>';
+        if (status === "winner") {
+          html +=
+            '<p class="result-desc">番号カードの写真と配送先情報のご提出をお願いいたします。' +
+            (data.submit_deadline ? "（" + formatDateJP(data.submit_deadline) + "まで）" : "") + '</p>' +
+            '<a class="btn" href="shipping.html">配送先を入力する</a>';
+        } else {
+          html +=
+            '<p class="result-desc">ご提出いただいた内容の確認が完了しています。<br>発送までしばらくお待ちください。</p>' +
+            '<a class="btn" href="shipping.html">提出内容を確認・修正する</a>';
+        }
+        html += '</div>';
+        area.innerHTML = html;
+      } else if (status === "invalidated") {
+        area.innerHTML =
+          '<div class="card"><div class="icon">😢</div>' +
+          '<div class="result-title lose">今回は当選が無効となりました</div>' +
+          '<div class="result-summary">' + summary + '</div>' +
+          '<p class="result-desc">番号カードの確認ができなかった、または期限までにご提出がなかったため、当選が無効となりました。<br>ご不明点は公式LINEまでお問い合わせください。</p></div>';
+      } else {
+        // 'none' or 'reserve' — shown identically per design decision
+        area.innerHTML =
+          '<div class="card"><div class="icon">😢</div>' +
+          '<div class="result-title lose">残念ながら今回は当選されませんでした…</div>' +
+          '<div class="result-summary">' + summary + '</div>' +
+          '<p class="result-desc">またの機会をお楽しみに。<br>SUMUADI製品はQoo10でもお買い求めいただけます。</p></div>';
+      }
+
+      renderWinners(data.winners);
+    }
+
+    function renderWinners(winners) {
+      if (!winners || !winners.length) return;
+      var byProduct = { toner: [], cream: [], serum: [] };
+      winners.forEach(function (w) {
+        if (byProduct[w.product]) byProduct[w.product].push(w.ball_number);
+      });
+
+      var html = "";
+      Object.keys(PRODUCT_LABELS).forEach(function (p) {
+        if (!byProduct[p].length) return;
+        html += '<div class="winners-group"><div class="g-label">' + PRODUCT_LABELS[p] + '</div><div class="winners-numbers">';
+        byProduct[p].forEach(function (n) {
+          html += '<span class="num-chip">No.' + n + '</span>';
+        });
+        html += '</div></div>';
+      });
+
+      if (!html) html = '<div class="empty">当選番号はまだありません</div>';
+
+      document.getElementById("winners-list").innerHTML = html;
+      document.getElementById("winners-card").style.display = "block";
+    }
+  })();
+  </script>
+</body>
+</html>
