@@ -1,6 +1,9 @@
+// GET  /submit-entry   Authorization: Bearer <session_token>
+//   -> { entry: {...} | null }  (fetch the caller's own entry, for the re-login edit flow)
 // POST /submit-entry  Authorization: Bearer <session_token>  { product, ball_number, display_name, agree }
-// Validates entry period, friend status, product/ball_number range, and the two DB-level
-// uniqueness rules (1 account = 1 entry, product+ball_number can't be claimed twice).
+//   Creates the caller's entry, or — if one already exists and is still 'none' (not yet
+//   drawn) — updates it in place. Validates entry period, friend status, product/ball_number
+//   range, and the DB-level uniqueness rule (product+ball_number can't be claimed twice).
 import { corsHeadersFor, handleOptions } from "../_shared/cors.ts";
 import { verifyToken } from "../_shared/session.ts";
 import { getServiceClient } from "../_shared/supabaseAdmin.ts";
@@ -31,7 +34,7 @@ Deno.serve(async (req) => {
   if (opt) return opt;
   const cors = corsHeadersFor(req);
 
-  if (req.method !== "POST") {
+  if (req.method !== "GET" && req.method !== "POST") {
     return json({ error: "method_not_allowed" }, 405, cors);
   }
 
@@ -47,6 +50,27 @@ Deno.serve(async (req) => {
     return json({ error: "unauthorized" }, 401, cors);
   }
 
+  const supabase = getServiceClient();
+
+  const { data: participant, error: pError } = await supabase
+    .from("participants")
+    .select("id, is_friend")
+    .eq("line_user_id", session.sub)
+    .single();
+  if (pError || !participant) {
+    return json({ error: "participant_not_found" }, 400, cors);
+  }
+
+  if (req.method === "GET") {
+    const { data: existing } = await supabase
+      .from("entries")
+      .select("id, product, ball_number, winner_status, created_at")
+      .eq("participant_id", participant.id)
+      .maybeSingle();
+    return json({ entry: existing ?? null }, 200, cors);
+  }
+
+  // POST from here on
   let body: { product?: string; ball_number?: number; display_name?: string; agree?: boolean };
   try {
     body = await req.json();
@@ -66,8 +90,6 @@ Deno.serve(async (req) => {
     return json({ error: "agreement_required" }, 400, cors);
   }
 
-  const supabase = getServiceClient();
-
   const { data: config, error: configError } = await supabase
     .from("event_config")
     .select("entry_start, entry_end")
@@ -84,20 +106,36 @@ Deno.serve(async (req) => {
     return json({ error: "entry_closed" }, 403, cors);
   }
 
-  const { data: participant, error: pError } = await supabase
-    .from("participants")
-    .select("id, is_friend")
-    .eq("line_user_id", session.sub)
-    .single();
-  if (pError || !participant) {
-    return json({ error: "participant_not_found" }, 400, cors);
-  }
   if (!participant.is_friend) {
     return json({ error: "friend_required" }, 403, cors);
   }
 
   if (display_name) {
     await supabase.from("participants").update({ display_name }).eq("id", participant.id);
+  }
+
+  const { data: existing } = await supabase
+    .from("entries")
+    .select("id, winner_status")
+    .eq("participant_id", participant.id)
+    .maybeSingle();
+
+  if (existing) {
+    if (existing.winner_status !== "none") {
+      return json({ error: "entry_locked" }, 409, cors);
+    }
+    const { error: updateError } = await supabase
+      .from("entries")
+      .update({ product, ball_number })
+      .eq("id", existing.id);
+    if (updateError) {
+      if (updateError.code === "23505") {
+        return json({ error: "number_taken" }, 409, cors);
+      }
+      console.error(updateError);
+      return json({ error: "db_error" }, 500, cors);
+    }
+    return json({ ok: true, product, ball_number, updated: true }, 200, cors);
   }
 
   const { error: insertError } = await supabase.from("entries").insert({
@@ -115,5 +153,5 @@ Deno.serve(async (req) => {
     return json({ error: "db_error" }, 500, cors);
   }
 
-  return json({ ok: true, product, ball_number }, 200, cors);
+  return json({ ok: true, product, ball_number, updated: false }, 200, cors);
 });

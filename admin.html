@@ -505,14 +505,24 @@
       if (!data.rows.length) {
         document.getElementById("ent-table-wrap").innerHTML = '<div class="empty">응모 내역이 없습니다</div>';
       } else {
-        var html = "<table><thead><tr><th>제품</th><th>번호</th><th>닉네임</th><th>상태</th><th>응모일시</th></tr></thead><tbody>";
+        var html = "<table><thead><tr><th>제품</th><th>번호</th><th>닉네임</th><th>상태</th><th>응모일시</th><th>관리</th></tr></thead><tbody>";
         data.rows.forEach(function (r) {
           html += "<tr><td>" + (PRODUCT_LABELS[r.product] || r.product) + "</td><td>" + r.ball_number + "</td><td>" +
             (r.participants ? escapeHtml(r.participants.display_name) : "") + "</td><td>" + badge(r.winner_status) +
-            "</td><td>" + new Date(r.created_at).toLocaleString("ko-KR") + "</td></tr>";
+            "</td><td>" + new Date(r.created_at).toLocaleString("ko-KR") + '</td><td class="row-actions">' +
+            '<button class="btn btn-sm" data-edit-entry="' + r.id + '" data-product="' + r.product + '" data-number="' + r.ball_number + '">수정</button>' +
+            '<button class="btn btn-sm btn-ghost" data-delete-entry="' + r.id + '">삭제</button></td></tr>';
         });
         html += "</tbody></table>";
-        document.getElementById("ent-table-wrap").innerHTML = html;
+        var wrap = document.getElementById("ent-table-wrap");
+        wrap.innerHTML = html;
+
+        wrap.querySelectorAll("[data-edit-entry]").forEach(function (btn) {
+          btn.addEventListener("click", function () { editEntry(btn); });
+        });
+        wrap.querySelectorAll("[data-delete-entry]").forEach(function (btn) {
+          btn.addEventListener("click", function () { deleteEntry(btn.dataset.deleteEntry); });
+        });
       }
 
       var totalPages = Math.max(Math.ceil(data.count / data.pageSize), 1);
@@ -533,6 +543,58 @@
     return String(s).replace(/[&<>"']/g, function (c) {
       return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
     });
+  }
+
+  var ENTRY_EDIT_ERROR_MESSAGES = {
+    invalid_product: "제품 값이 올바르지 않습니다.",
+    invalid_ball_number: "번호가 해당 제품의 범위를 벗어났습니다.",
+    number_taken: "그 제품+번호 조합은 이미 다른 응모에서 사용 중입니다.",
+    entry_not_found: "해당 응모를 찾을 수 없습니다.",
+    db_error: "처리 중 오류가 발생했습니다.",
+  };
+
+  async function editEntry(btn) {
+    var product = prompt("제품 (toner / cream / serum)", btn.dataset.product);
+    if (product === null) return;
+    if (!["toner", "cream", "serum"].includes(product)) {
+      flash("err", "제품은 toner / cream / serum 중 하나여야 합니다.");
+      return;
+    }
+    var numberStr = prompt("번호", btn.dataset.number);
+    if (numberStr === null) return;
+    var ballNumber = parseInt(numberStr, 10);
+    if (!Number.isInteger(ballNumber)) {
+      flash("err", "번호는 숫자여야 합니다.");
+      return;
+    }
+    if (!confirm("문의 대응용 수정입니다. " + PRODUCT_LABELS[product] + " No." + ballNumber + "(으)로 변경할까요?")) return;
+
+    try {
+      var res = await adminFetch("/admin-edit-entry", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ entry_id: btn.dataset.editEntry, product: product, ball_number: ballNumber }),
+      });
+      var data = await res.json();
+      if (!res.ok) throw new Error(ENTRY_EDIT_ERROR_MESSAGES[data.error] || data.error || "수정 실패");
+      flash("ok", "수정되었습니다.");
+      loadEntries();
+    } catch (err) {
+      flash("err", err.message);
+    }
+  }
+
+  async function deleteEntry(entryId) {
+    if (!confirm("이 응모를 삭제할까요? 삭제하면 해당 참여자는 다시 응모할 수 있게 됩니다.")) return;
+    try {
+      var res = await adminFetch("/admin-edit-entry?entry_id=" + encodeURIComponent(entryId), { method: "DELETE" });
+      var data = await res.json();
+      if (!res.ok) throw new Error(data.error || "삭제 실패");
+      flash("ok", "삭제되었습니다.");
+      loadEntries();
+    } catch (err) {
+      flash("err", err.message);
+    }
   }
 
   // ---------- draw ----------
