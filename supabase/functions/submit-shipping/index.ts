@@ -1,7 +1,7 @@
 // POST /submit-shipping  Authorization: Bearer <session_token>
 // { name_kanji, name_romaji, postal_code, prefecture, city, address_line, building?, phone,
-//   email?, card_photo_front, card_photo_back }
-// Saves the winner's card photo paths + EMS shipping info, then sends the confirmation push
+//   email?, card_photo }
+// Saves the winner's card photo path + EMS shipping info, then sends the confirmation push
 // (template B). Allowed while winner_status is 'winner' or 'verified' and before submit_deadline.
 import { corsHeadersFor, handleOptions } from "../_shared/cors.ts";
 import { verifyToken } from "../_shared/session.ts";
@@ -28,8 +28,7 @@ interface ShippingBody {
   building?: string;
   phone?: string;
   email?: string;
-  card_photo_front?: string;
-  card_photo_back?: string;
+  card_photo?: string;
 }
 
 const REQUIRED_FIELDS: (keyof ShippingBody)[] = [
@@ -40,8 +39,7 @@ const REQUIRED_FIELDS: (keyof ShippingBody)[] = [
   "city",
   "address_line",
   "phone",
-  "card_photo_front",
-  "card_photo_back",
+  "card_photo",
 ];
 
 Deno.serve(async (req) => {
@@ -110,15 +108,14 @@ Deno.serve(async (req) => {
     return json({ error: "not_a_winner" }, 403, cors);
   }
 
-  const frontPrefix = `${participant.id}/${entry.id}-front.`;
-  const backPrefix = `${participant.id}/${entry.id}-back.`;
-  if (!body.card_photo_front!.startsWith(frontPrefix) || !body.card_photo_back!.startsWith(backPrefix)) {
+  const photoPrefix = `${participant.id}/${entry.id}.`;
+  if (!body.card_photo!.startsWith(photoPrefix)) {
     return json({ error: "invalid_photo_path" }, 400, cors);
   }
 
   const { error: entryUpdateError } = await supabase
     .from("entries")
-    .update({ card_photo_front: body.card_photo_front, card_photo_back: body.card_photo_back })
+    .update({ card_photo: body.card_photo })
     .eq("id", entry.id);
   if (entryUpdateError) {
     console.error(entryUpdateError);

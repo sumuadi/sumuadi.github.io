@@ -18,16 +18,12 @@
   .card{background:#fff;border-radius:20px;padding:22px;margin-bottom:16px;
     box-shadow:0 6px 20px rgba(0,0,0,.08)}
   .card h2{font-size:14px;color:#6b4fa0;margin-bottom:12px}
-  .mission{background:#f5eeff;border-radius:14px;padding:16px;font-size:13px;
-    line-height:1.9;color:#6b4fa0;margin-bottom:10px}
-  .mission b{color:#8a63d6}
-  .upload-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:10px}
-  .upload-slot{border:2px dashed #e4d9f9;border-radius:14px;padding:10px;text-align:center;
-    cursor:pointer;position:relative;min-height:110px;display:flex;flex-direction:column;
-    align-items:center;justify-content:center}
+  .upload-slot{border:2px dashed #e4d9f9;border-radius:14px;padding:16px;text-align:center;
+    cursor:pointer;position:relative;min-height:130px;display:flex;flex-direction:column;
+    align-items:center;justify-content:center;margin-top:10px}
   .upload-slot.done{border-color:#8bc99a;border-style:solid}
-  .upload-slot img{max-width:100%;max-height:80px;border-radius:8px;margin-bottom:6px}
-  .upload-slot .label{font-size:12px;color:#9088a8;font-weight:bold}
+  .upload-slot img{max-width:100%;max-height:140px;border-radius:8px;margin-bottom:6px}
+  .upload-slot .label{font-size:13px;color:#9088a8;font-weight:bold}
   .upload-slot .status{font-size:11px;color:#2f8a4a;margin-top:4px}
   .upload-slot input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer}
   label.field-label{display:block;font-size:12.5px;font-weight:bold;color:#6b4fa0;
@@ -62,20 +58,11 @@
 
       <div class="card">
         <h2>① 番号カードの写真</h2>
-        <div class="mission" id="mission-box">
-          手書きで「<b>LINEニックネーム＋スムアディ</b>」と書いたメモを、番号カードの横に置いて撮影してください。
+        <div class="upload-slot" id="slot-photo">
+          <div class="label">写真を選択</div>
+          <input type="file" accept="image/*" id="file-photo">
         </div>
-        <div class="upload-row">
-          <div class="upload-slot" id="slot-front">
-            <div class="label">表面</div>
-            <input type="file" accept="image/*" id="file-front">
-          </div>
-          <div class="upload-slot" id="slot-back">
-            <div class="label">裏面</div>
-            <input type="file" accept="image/*" id="file-back">
-          </div>
-        </div>
-        <div class="hint">番号がはっきり見えるように撮影してください</div>
+        <div class="hint">番号がはっきり見えるように撮影してください。<br>本人確認のため、追加の写真提出をお願いする場合があります。</div>
       </div>
 
       <div class="card">
@@ -142,17 +129,15 @@
     prefSelect.innerHTML = '<option value="">選択してください</option>' +
       PREFECTURES.map(function (p) { return '<option value="' + p + '">' + p + '</option>'; }).join("");
 
-    var uploadedFront = null;
-    var uploadedBack = null;
+    var uploadedPhoto = null;
 
-    function setupUploadSlot(side, fileInputId, slotId, existingPath) {
-      var slot = document.getElementById(slotId);
-      var input = document.getElementById(fileInputId);
+    function setupUploadSlot(existingPath) {
+      var slot = document.getElementById("slot-photo");
+      var input = document.getElementById("file-photo");
 
       if (existingPath) {
+        uploadedPhoto = existingPath;
         markSlotDone(slot, null);
-        if (side === "front") uploadedFront = existingPath;
-        else uploadedBack = existingPath;
       }
 
       input.addEventListener("change", function () {
@@ -164,7 +149,7 @@
         fetch(cfg.FUNCTIONS_URL + "/card-upload-url", {
           method: "POST",
           headers: { "Content-Type": "application/json", Authorization: "Bearer " + session.token },
-          body: JSON.stringify({ side: side, ext: ext }),
+          body: JSON.stringify({ ext: ext }),
         })
           .then(function (res) { return res.json(); })
           .then(function (data) {
@@ -179,15 +164,14 @@
             });
           })
           .then(function (path) {
-            if (side === "front") uploadedFront = path;
-            else uploadedBack = path;
+            uploadedPhoto = path;
             var reader = new FileReader();
             reader.onload = function () { markSlotDone(slot, reader.result); };
             reader.readAsDataURL(file);
           })
           .catch(function (err) {
             console.error(err);
-            slot.querySelector(".label").textContent = side === "front" ? "表面" : "裏面";
+            slot.querySelector(".label").textContent = "写真を選択";
             showError("写真のアップロードに失敗しました。もう一度お試しください。");
           });
       });
@@ -237,8 +221,7 @@
         var form = document.getElementById("shipping-form");
         form.style.display = "block";
 
-        setupUploadSlot("front", "file-front", "slot-front", data.entry.card_photo_front);
-        setupUploadSlot("back", "file-back", "slot-back", data.entry.card_photo_back);
+        setupUploadSlot(data.entry.card_photo);
 
         if (data.shipping) {
           okBox.style.display = "block";
@@ -288,8 +271,8 @@
       e.preventDefault();
       errorBox.style.display = "none";
 
-      if (!uploadedFront || !uploadedBack) {
-        showError("番号カードの表面・裏面の写真をアップロードしてください。");
+      if (!uploadedPhoto) {
+        showError("番号カードの写真をアップロードしてください。");
         return;
       }
 
@@ -309,8 +292,7 @@
           building: document.getElementById("building").value.trim(),
           phone: document.getElementById("phone").value.trim(),
           email: document.getElementById("email").value.trim(),
-          card_photo_front: uploadedFront,
-          card_photo_back: uploadedBack,
+          card_photo: uploadedPhoto,
         }),
       })
         .then(function (res) {

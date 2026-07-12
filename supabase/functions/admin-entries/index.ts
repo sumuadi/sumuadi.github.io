@@ -27,7 +27,7 @@ Deno.serve(async (req) => {
   let query = supabase
     .from("entries")
     .select(
-      "id, product, ball_number, winner_status, invalid_reason, card_photo_front, card_photo_back, created_at, participants(display_name, line_user_id)",
+      "id, product, ball_number, winner_status, invalid_reason, card_photo, created_at, participants(display_name, line_user_id)",
       { count: "exact" },
     )
     .order("created_at", { ascending: false })
@@ -44,18 +44,10 @@ Deno.serve(async (req) => {
 
   const rows = await Promise.all(
     (data ?? []).map(async (row) => {
-      const signed: { card_photo_front_url?: string; card_photo_back_url?: string } = {};
-      if (row.card_photo_front) {
-        const { data: s } = await supabase.storage
-          .from("card-photos")
-          .createSignedUrl(row.card_photo_front, 3600);
-        if (s) signed.card_photo_front_url = s.signedUrl;
-      }
-      if (row.card_photo_back) {
-        const { data: s } = await supabase.storage
-          .from("card-photos")
-          .createSignedUrl(row.card_photo_back, 3600);
-        if (s) signed.card_photo_back_url = s.signedUrl;
+      const signed: { card_photo_url?: string } = {};
+      if (row.card_photo) {
+        const { data: s } = await supabase.storage.from("card-photos").createSignedUrl(row.card_photo, 3600);
+        if (s) signed.card_photo_url = s.signedUrl;
       }
       return { ...row, ...signed };
     }),

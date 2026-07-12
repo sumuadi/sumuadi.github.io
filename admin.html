@@ -643,8 +643,7 @@
     var html = "<table><thead><tr><th>제품</th><th>번호</th><th>닉네임</th><th>카드사진</th><th>처리</th></tr></thead><tbody>";
     rows.forEach(function (r) {
       var photos = "";
-      if (r.card_photo_front_url) photos += '<img class="thumb" src="' + r.card_photo_front_url + '" onclick="window.open(this.src)">';
-      if (r.card_photo_back_url) photos += '<img class="thumb" src="' + r.card_photo_back_url + '" onclick="window.open(this.src)">';
+      if (r.card_photo_url) photos += '<img class="thumb" src="' + r.card_photo_url + '" onclick="window.open(this.src)">';
       if (!photos) photos = '<span style="color:#a68a85;font-size:12px">미제출</span>';
       html += "<tr><td>" + (PRODUCT_LABELS[r.product] || r.product) + "</td><td>No." + r.ball_number + "</td><td>" +
         escapeHtml(r.participants ? r.participants.display_name : "") + "</td><td>" + photos +

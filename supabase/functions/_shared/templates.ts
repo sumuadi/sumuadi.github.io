@@ -1,7 +1,4 @@
-// LINE message templates (기획서 §5). The "mission word" is only ever revealed inside the
-// winner-announce push — never in the frontend before that — so a forged card photo can't be
-// prepared ahead of time.
-export const MISSION_WORD = "スムアディ";
+// LINE message templates (기획서 §5).
 const RESULT_URL = "https://sumuadi.github.io/result.html";
 
 function formatDateJP(iso: string | null): string {
@@ -20,17 +17,15 @@ SUMUADIガチャイベントにご応募いただき、
 厳正なる抽選の結果、${displayName}様が当選されました！
 
 ▼賞品の受け取りには下記のご提出が必要です
-①番号カードの写真（表面・裏面）
-　※手書きで「LINEニックネーム＋${MISSION_WORD}」を
-　　書いたメモをカードの横に置いて撮影してください
+①番号カードの写真
 ②配送先情報
 
 下記リンクより${deadline}までにご入力ください。
 ${RESULT_URL}
 
 ※番号カードの確認ができない場合、または期限までに
-ご入力がない場合は、当選が無効となりますので
-ご注意ください。`;
+ご入力がない場合は、当選が無効となりますのでご注意ください。
+※本人確認のため、追加の写真提出をお願いする場合があります。`;
 }
 
 export function shippingReceivedTemplate(params: {

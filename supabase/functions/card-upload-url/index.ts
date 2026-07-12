@@ -1,6 +1,7 @@
-// POST /card-upload-url  Authorization: Bearer <session_token>  { side: "front"|"back", ext }
+// POST /card-upload-url  Authorization: Bearer <session_token>  { ext }
 // Issues a short-lived signed upload URL for the private card-photos bucket. The browser then
 // PUTs the file bytes directly to that URL — the Edge Function never touches the image data.
+// Single photo only (front side) per 정책 확정 — no back-of-card photo.
 import { corsHeadersFor, handleOptions } from "../_shared/cors.ts";
 import { verifyToken } from "../_shared/session.ts";
 import { getServiceClient } from "../_shared/supabaseAdmin.ts";
@@ -37,17 +38,13 @@ Deno.serve(async (req) => {
     return json({ error: "unauthorized" }, 401, cors);
   }
 
-  let body: { side?: string; ext?: string };
+  let body: { ext?: string };
   try {
     body = await req.json();
   } catch {
     return json({ error: "invalid_request" }, 400, cors);
   }
-  const side = body.side;
   const ext = (body.ext || "jpg").toLowerCase().replace(/[^a-z0-9]/g, "");
-  if (side !== "front" && side !== "back") {
-    return json({ error: "invalid_side" }, 400, cors);
-  }
   if (!ALLOWED_EXT.includes(ext)) {
     return json({ error: "invalid_ext" }, 400, cors);
   }
@@ -75,7 +72,7 @@ Deno.serve(async (req) => {
     return json({ error: "not_a_winner" }, 403, cors);
   }
 
-  const path = `${participant.id}/${entry.id}-${side}.${ext}`;
+  const path = `${participant.id}/${entry.id}.${ext}`;
   const { data: signed, error: signError } = await supabase.storage
     .from("card-photos")
     .createSignedUploadUrl(path, { upsert: true });
