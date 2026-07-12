@@ -1,0 +1,702 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SUMUADI 관리자</title>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{font-family:-apple-system,BlinkMacSystemFont,'Malgun Gothic','Apple SD Gothic Neo',sans-serif;
+    background:#f7f3f2;color:#332521;min-height:100vh}
+  .hidden{display:none !important}
+
+  /* login */
+  #login-view{min-height:100vh;display:flex;align-items:center;justify-content:center;
+    background:linear-gradient(160deg,#f9d9d3 0%,#f3b8ae 55%,#e8837b 100%)}
+  .login-box{background:#fff;border-radius:20px;padding:36px 32px;width:100%;max-width:340px;
+    box-shadow:0 10px 30px rgba(0,0,0,.15)}
+  .login-box h1{font-size:16px;letter-spacing:3px;color:#d96a61;font-weight:bold;margin-bottom:24px;text-align:center}
+  .field{margin-bottom:14px}
+  .field label{display:block;font-size:12.5px;color:#8a6a64;margin-bottom:6px;font-weight:bold}
+  .field input{width:100%;padding:11px 12px;border-radius:10px;border:1.5px solid #eaddda;font-size:14px}
+  .field input:focus{outline:none;border-color:#e8837b}
+  .btn{background:linear-gradient(160deg,#f3b8ae,#e8837b);color:#fff;font-weight:bold;
+    border:none;border-radius:10px;padding:12px;font-size:14px;cursor:pointer;width:100%}
+  .btn:disabled{opacity:.5;cursor:default}
+  .btn-ghost{background:#fff;color:#c14a3f;border:1.5px solid #f1d0cb}
+  .btn-sm{width:auto;padding:8px 16px;font-size:13px;border-radius:8px}
+  .err{color:#c14a3f;font-size:12.5px;margin-top:10px;text-align:center;display:none}
+
+  /* app shell */
+  #app-view{max-width:1080px;margin:0 auto;padding:20px 20px 60px}
+  header{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;flex-wrap:wrap;gap:10px}
+  header h1{font-size:18px;color:#d96a61;letter-spacing:2px}
+  header .who{font-size:12.5px;color:#8a6a64}
+  nav{display:flex;gap:6px;margin-bottom:20px;flex-wrap:wrap}
+  nav button{background:#fff;border:1.5px solid #eaddda;border-radius:20px;padding:8px 16px;
+    font-size:13px;cursor:pointer;color:#6b4b46}
+  nav button.active{background:#e8837b;color:#fff;border-color:#e8837b}
+  .panel{display:none}
+  .panel.active{display:block}
+  .card{background:#fff;border-radius:16px;padding:20px;margin-bottom:16px;box-shadow:0 2px 10px rgba(0,0,0,.05)}
+  .card h2{font-size:14px;color:#a24b42;margin-bottom:14px}
+  .grid-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px}
+  .stat{background:#fff7f6;border-radius:12px;padding:14px;text-align:center}
+  .stat .n{font-size:22px;font-weight:bold;color:#d96a61}
+  .stat .l{font-size:11.5px;color:#8a6a64;margin-top:4px}
+  table{width:100%;border-collapse:collapse;font-size:13px}
+  th,td{text-align:left;padding:8px 10px;border-bottom:1px solid #f1e6e3}
+  th{color:#8a6a64;font-weight:bold;font-size:12px}
+  .badge{display:inline-block;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:bold}
+  .badge-none{background:#eee;color:#777}
+  .badge-winner{background:#fff1c9;color:#a67c00}
+  .badge-reserve{background:#e4eeff;color:#3a5fb0}
+  .badge-verified{background:#dff5e3;color:#2f8a4a}
+  .badge-invalidated{background:#fde0dd;color:#c14a3f}
+  .row-actions{display:flex;gap:6px}
+  .field-row{display:flex;gap:10px;flex-wrap:wrap}
+  .field-row .field{flex:1;min-width:140px}
+  select{width:100%;padding:11px 12px;border-radius:10px;border:1.5px solid #eaddda;font-size:14px}
+  .thumb{width:52px;height:52px;object-fit:cover;border-radius:8px;cursor:pointer}
+  .msg{font-size:12.5px;padding:10px 12px;border-radius:8px;margin-bottom:12px;display:none}
+  .msg-ok{background:#dff5e3;color:#2f8a4a}
+  .msg-err{background:#fde0dd;color:#c14a3f}
+  .pager{display:flex;gap:8px;align-items:center;margin-top:12px;font-size:13px}
+  .empty{color:#a68a85;font-size:13px;padding:16px 0;text-align:center}
+</style>
+</head>
+<body>
+
+<div id="login-view">
+  <div class="login-box">
+    <h1>SUMUADI 관리자</h1>
+    <form id="login-form">
+      <div class="field">
+        <label for="email">이메일</label>
+        <input type="email" id="email" required autocomplete="username">
+      </div>
+      <div class="field">
+        <label for="password">비밀번호</label>
+        <input type="password" id="password" required autocomplete="current-password">
+      </div>
+      <button type="submit" class="btn" id="login-btn">로그인</button>
+      <div class="err" id="login-err"></div>
+    </form>
+  </div>
+</div>
+
+<div id="app-view" class="hidden">
+  <header>
+    <h1>SUMUADI 관리자</h1>
+    <div>
+      <span class="who" id="who-label"></span>
+      <button class="btn btn-ghost btn-sm" id="logout-btn" style="margin-left:10px">로그아웃</button>
+    </div>
+  </header>
+
+  <nav>
+    <button data-panel="dashboard" class="active">대시보드</button>
+    <button data-panel="config">이벤트 설정</button>
+    <button data-panel="entries">응모 목록</button>
+    <button data-panel="draw">추첨</button>
+    <button data-panel="review">당첨자 검수</button>
+    <button data-panel="shipping">배송 정보</button>
+  </nav>
+
+  <div id="global-msg" class="msg"></div>
+
+  <!-- Dashboard -->
+  <section class="panel active" id="panel-dashboard">
+    <div class="card">
+      <h2>전체 현황</h2>
+      <div class="grid-stats" id="dash-stats">읽는 중…</div>
+    </div>
+    <div class="card">
+      <h2>제품별 응모 수</h2>
+      <div class="grid-stats" id="dash-product">읽는 중…</div>
+    </div>
+    <div class="card">
+      <h2>당첨 상태별 현황</h2>
+      <div class="grid-stats" id="dash-status">읽는 중…</div>
+    </div>
+  </div>
+
+  <!-- Event config -->
+  <section class="panel" id="panel-config">
+    <div class="card">
+      <h2>이벤트 설정</h2>
+      <div class="field-row">
+        <div class="field">
+          <label>이벤트명</label>
+          <input type="text" id="cfg-event-name">
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label>응모 시작 (KST 기준 입력, 서버엔 UTC로 저장)</label>
+          <input type="datetime-local" id="cfg-entry-start">
+        </div>
+        <div class="field">
+          <label>응모 마감</label>
+          <input type="datetime-local" id="cfg-entry-end">
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label>발표일</label>
+          <input type="datetime-local" id="cfg-announce-at">
+        </div>
+        <div class="field">
+          <label>배송정보/카드사진 제출 마감</label>
+          <input type="datetime-local" id="cfg-submit-deadline">
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label>당첨 인원</label>
+          <input type="number" id="cfg-winner-count" min="0">
+        </div>
+        <div class="field">
+          <label>예비 인원</label>
+          <input type="number" id="cfg-reserve-count" min="0">
+        </div>
+      </div>
+      <button class="btn btn-sm" id="cfg-save-btn">저장</button>
+    </div>
+
+    <div class="card">
+      <h2>발표 상태</h2>
+      <p style="font-size:13px;color:#6b4b46;margin-bottom:12px" id="cfg-announce-status">-</p>
+      <button class="btn btn-sm" id="cfg-announce-toggle-btn">발표 ON</button>
+      <p style="font-size:11.5px;color:#a68a85;margin-top:10px">
+        발표 ON 시 /result 페이지가 활성화됩니다 (Phase 3). LINE 알림 발송은 Phase 3에서 별도 처리됩니다.
+      </p>
+    </div>
+  </section>
+
+  <!-- Entries -->
+  <section class="panel" id="panel-entries">
+    <div class="card">
+      <h2>응모 목록</h2>
+      <div class="field-row" style="margin-bottom:14px">
+        <div class="field">
+          <label>제품</label>
+          <select id="ent-filter-product">
+            <option value="">전체</option>
+            <option value="toner">토너</option>
+            <option value="cream">크림</option>
+            <option value="serum">세럼</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>상태</label>
+          <select id="ent-filter-status">
+            <option value="">전체</option>
+            <option value="none">미추첨</option>
+            <option value="winner">당첨(검수대기)</option>
+            <option value="reserve">예비</option>
+            <option value="verified">검수완료</option>
+            <option value="invalidated">무효</option>
+          </select>
+        </div>
+      </div>
+      <div id="ent-table-wrap"><div class="empty">읽는 중…</div></div>
+      <div class="pager">
+        <button class="btn btn-ghost btn-sm" id="ent-prev">이전</button>
+        <span id="ent-page-label"></span>
+        <button class="btn btn-ghost btn-sm" id="ent-next">다음</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Draw -->
+  <section class="panel" id="panel-draw">
+    <div class="card">
+      <h2>추첨 실행</h2>
+      <p style="font-size:12.5px;color:#a68a85;margin-bottom:12px">
+        winner_status가 '미추첨(none)'인 응모 중에서만 추첨합니다. 이미 당첨/예비로 뽑힌 건은 건드리지 않습니다.
+      </p>
+      <div class="field-row">
+        <div class="field">
+          <label>당첨 인원</label>
+          <input type="number" id="draw-winner-count" min="0">
+        </div>
+        <div class="field">
+          <label>예비 인원</label>
+          <input type="number" id="draw-reserve-count" min="0">
+        </div>
+      </div>
+      <button class="btn btn-sm" id="draw-run-btn">추첨 실행</button>
+      <div id="draw-result" style="margin-top:16px"></div>
+    </div>
+  </section>
+
+  <!-- Review -->
+  <section class="panel" id="panel-review">
+    <div class="card">
+      <h2>당첨자 카드 검수 (검수 대기: winner 상태)</h2>
+      <div id="review-table-wrap"><div class="empty">읽는 중…</div></div>
+    </div>
+    <div class="card">
+      <h2>예비 당첨자 (승격 대기: reserve 상태)</h2>
+      <div id="reserve-table-wrap"><div class="empty">읽는 중…</div></div>
+    </div>
+  </section>
+
+  <!-- Shipping -->
+  <section class="panel" id="panel-shipping">
+    <div class="card">
+      <h2>배송 정보</h2>
+      <p style="font-size:12.5px;color:#a68a85;margin-bottom:14px">
+        당첨자가 배송 정보를 제출하면(Phase 3) 여기서 CSV로 내려받아 EMS 라벨 작성에 사용합니다.
+      </p>
+      <a class="btn btn-sm" id="shipping-export-btn" style="display:inline-block;text-decoration:none;text-align:center">CSV 다운로드</a>
+    </div>
+  </section>
+</div>
+
+<script src="config.js"></script>
+<script>
+(function () {
+  var cfg = window.SUMUADI_CONFIG;
+
+  // ---------- auth ----------
+  function getSession() {
+    var raw = sessionStorage.getItem(cfg.ADMIN_SESSION_STORAGE_KEY);
+    return raw ? JSON.parse(raw) : null;
+  }
+  function setSession(s) {
+    sessionStorage.setItem(cfg.ADMIN_SESSION_STORAGE_KEY, JSON.stringify(s));
+  }
+  function clearSession() {
+    sessionStorage.removeItem(cfg.ADMIN_SESSION_STORAGE_KEY);
+  }
+
+  function showLogin() {
+    document.getElementById("login-view").classList.remove("hidden");
+    document.getElementById("app-view").classList.add("hidden");
+  }
+  function showApp() {
+    document.getElementById("login-view").classList.add("hidden");
+    document.getElementById("app-view").classList.remove("hidden");
+    var s = getSession();
+    document.getElementById("who-label").textContent = s ? s.email : "";
+  }
+
+  async function refreshSession() {
+    var s = getSession();
+    if (!s || !s.refresh_token) return false;
+    var res = await fetch(cfg.SUPABASE_URL + "/auth/v1/token?grant_type=refresh_token", {
+      method: "POST",
+      headers: { apikey: cfg.SUPABASE_PUBLISHABLE_KEY, "Content-Type": "application/json" },
+      body: JSON.stringify({ refresh_token: s.refresh_token }),
+    });
+    if (!res.ok) return false;
+    var data = await res.json();
+    setSession({ access_token: data.access_token, refresh_token: data.refresh_token, email: s.email });
+    return true;
+  }
+
+  async function adminFetch(path, options) {
+    options = options || {};
+    var s = getSession();
+    if (!s) throw new Error("no_session");
+    options.headers = Object.assign({}, options.headers, { Authorization: "Bearer " + s.access_token });
+    var res = await fetch(cfg.FUNCTIONS_URL + path, options);
+    if (res.status === 401) {
+      var refreshed = await refreshSession();
+      if (refreshed) {
+        s = getSession();
+        options.headers.Authorization = "Bearer " + s.access_token;
+        res = await fetch(cfg.FUNCTIONS_URL + path, options);
+      }
+      if (res.status === 401) {
+        clearSession();
+        showLogin();
+        throw new Error("unauthorized");
+      }
+    }
+    return res;
+  }
+
+  document.getElementById("login-form").addEventListener("submit", async function (e) {
+    e.preventDefault();
+    var email = document.getElementById("email").value.trim();
+    var password = document.getElementById("password").value;
+    var btn = document.getElementById("login-btn");
+    var errEl = document.getElementById("login-err");
+    errEl.style.display = "none";
+    btn.disabled = true;
+    try {
+      var res = await fetch(cfg.SUPABASE_URL + "/auth/v1/token?grant_type=password", {
+        method: "POST",
+        headers: { apikey: cfg.SUPABASE_PUBLISHABLE_KEY, "Content-Type": "application/json" },
+        body: JSON.stringify({ email: email, password: password }),
+      });
+      var data = await res.json();
+      if (!res.ok) throw new Error(data.error_description || data.msg || "로그인 실패");
+      setSession({ access_token: data.access_token, refresh_token: data.refresh_token, email: email });
+      showApp();
+      initApp();
+    } catch (err) {
+      errEl.textContent = err.message || "로그인에 실패했습니다.";
+      errEl.style.display = "block";
+    } finally {
+      btn.disabled = false;
+    }
+  });
+
+  document.getElementById("logout-btn").addEventListener("click", function () {
+    clearSession();
+    showLogin();
+  });
+
+  // ---------- nav ----------
+  document.querySelectorAll("nav button").forEach(function (btn) {
+    btn.addEventListener("click", function () {
+      document.querySelectorAll("nav button").forEach(function (b) { b.classList.remove("active"); });
+      document.querySelectorAll(".panel").forEach(function (p) { p.classList.remove("active"); });
+      btn.classList.add("active");
+      document.getElementById("panel-" + btn.dataset.panel).classList.add("active");
+      if (btn.dataset.panel === "dashboard") loadDashboard();
+      if (btn.dataset.panel === "config") loadConfig();
+      if (btn.dataset.panel === "entries") loadEntries();
+      if (btn.dataset.panel === "review") loadReview();
+    });
+  });
+
+  function flash(kind, text) {
+    var el = document.getElementById("global-msg");
+    el.className = "msg " + (kind === "ok" ? "msg-ok" : "msg-err");
+    el.textContent = text;
+    el.style.display = "block";
+    window.scrollTo({ top: 0, behavior: "smooth" });
+    setTimeout(function () { el.style.display = "none"; }, 4000);
+  }
+
+  var PRODUCT_LABELS = { toner: "토너", cream: "크림", serum: "세럼" };
+  var STATUS_LABELS = { none: "미추첨", winner: "당첨(검수대기)", reserve: "예비", verified: "검수완료", invalidated: "무효" };
+
+  function badge(status) {
+    return '<span class="badge badge-' + status + '">' + (STATUS_LABELS[status] || status) + "</span>";
+  }
+
+  // ---------- dashboard ----------
+  async function loadDashboard() {
+    try {
+      var res = await adminFetch("/admin-dashboard");
+      var data = await res.json();
+      if (!res.ok) throw new Error(data.error || "불러오기 실패");
+
+      document.getElementById("dash-stats").innerHTML =
+        stat(data.total, "총 응모") + stat(data.shipping_submitted, "배송정보 제출") + stat(data.shipped, "발송 완료");
+
+      document.getElementById("dash-product").innerHTML = Object.keys(data.by_product)
+        .map(function (k) { return stat(data.by_product[k], PRODUCT_LABELS[k] || k); })
+        .join("");
+
+      document.getElementById("dash-status").innerHTML = Object.keys(data.by_status)
+        .map(function (k) { return stat(data.by_status[k], STATUS_LABELS[k] || k); })
+        .join("");
+    } catch (err) {
+      flash("err", err.message);
+    }
+  }
+  function stat(n, label) {
+    return '<div class="stat"><div class="n">' + n + '</div><div class="l">' + label + "</div></div>";
+  }
+
+  // ---------- event config ----------
+  function toLocalInputValue(iso) {
+    if (!iso) return "";
+    var d = new Date(iso);
+    var pad = function (n) { return String(n).padStart(2, "0"); };
+    return d.getFullYear() + "-" + pad(d.getMonth() + 1) + "-" + pad(d.getDate()) + "T" + pad(d.getHours()) + ":" + pad(d.getMinutes());
+  }
+  function fromLocalInputValue(v) {
+    if (!v) return null;
+    return new Date(v).toISOString();
+  }
+
+  var currentConfig = null;
+
+  async function loadConfig() {
+    try {
+      var res = await adminFetch("/admin-event-config");
+      var data = await res.json();
+      if (!res.ok) throw new Error(data.error || "불러오기 실패");
+      currentConfig = data;
+      document.getElementById("cfg-event-name").value = data.event_name || "";
+      document.getElementById("cfg-entry-start").value = toLocalInputValue(data.entry_start);
+      document.getElementById("cfg-entry-end").value = toLocalInputValue(data.entry_end);
+      document.getElementById("cfg-announce-at").value = toLocalInputValue(data.announce_at);
+      document.getElementById("cfg-submit-deadline").value = toLocalInputValue(data.submit_deadline);
+      document.getElementById("cfg-winner-count").value = data.winner_count ?? "";
+      document.getElementById("cfg-reserve-count").value = data.reserve_count ?? "";
+      document.getElementById("cfg-announce-status").textContent = data.is_announced ? "발표됨 (ON)" : "발표 전 (OFF)";
+      document.getElementById("cfg-announce-toggle-btn").textContent = data.is_announced ? "발표 취소(OFF로 되돌리기)" : "발표 ON";
+
+      // pre-fill draw counts too
+      document.getElementById("draw-winner-count").value = data.winner_count ?? "";
+      document.getElementById("draw-reserve-count").value = data.reserve_count ?? "";
+    } catch (err) {
+      flash("err", err.message);
+    }
+  }
+
+  document.getElementById("cfg-save-btn").addEventListener("click", async function () {
+    try {
+      var body = {
+        event_name: document.getElementById("cfg-event-name").value,
+        entry_start: fromLocalInputValue(document.getElementById("cfg-entry-start").value),
+        entry_end: fromLocalInputValue(document.getElementById("cfg-entry-end").value),
+        announce_at: fromLocalInputValue(document.getElementById("cfg-announce-at").value),
+        submit_deadline: fromLocalInputValue(document.getElementById("cfg-submit-deadline").value),
+        winner_count: document.getElementById("cfg-winner-count").value === "" ? null : parseInt(document.getElementById("cfg-winner-count").value, 10),
+        reserve_count: document.getElementById("cfg-reserve-count").value === "" ? null : parseInt(document.getElementById("cfg-reserve-count").value, 10),
+      };
+      var res = await adminFetch("/admin-event-config", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      });
+      var data = await res.json();
+      if (!res.ok) throw new Error(data.error || "저장 실패");
+      flash("ok", "저장되었습니다.");
+      loadConfig();
+    } catch (err) {
+      flash("err", err.message);
+    }
+  });
+
+  document.getElementById("cfg-announce-toggle-btn").addEventListener("click", async function () {
+    if (!currentConfig) return;
+    var next = !currentConfig.is_announced;
+    if (!confirm(next ? "발표를 ON으로 전환할까요? 참여자에게 결과가 노출됩니다." : "발표를 OFF로 되돌릴까요?")) return;
+    try {
+      var res = await adminFetch("/admin-event-config", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ is_announced: next }),
+      });
+      var data = await res.json();
+      if (!res.ok) throw new Error(data.error || "변경 실패");
+      flash("ok", "발표 상태가 변경되었습니다.");
+      loadConfig();
+    } catch (err) {
+      flash("err", err.message);
+    }
+  });
+
+  // ---------- entries list ----------
+  var entPage = 1;
+  async function loadEntries() {
+    var product = document.getElementById("ent-filter-product").value;
+    var status = document.getElementById("ent-filter-status").value;
+    var qs = new URLSearchParams({ page: String(entPage), pageSize: "20" });
+    if (product) qs.set("product", product);
+    if (status) qs.set("winner_status", status);
+
+    try {
+      var res = await adminFetch("/admin-entries?" + qs.toString());
+      var data = await res.json();
+      if (!res.ok) throw new Error(data.error || "불러오기 실패");
+
+      if (!data.rows.length) {
+        document.getElementById("ent-table-wrap").innerHTML = '<div class="empty">응모 내역이 없습니다</div>';
+      } else {
+        var html = "<table><thead><tr><th>제품</th><th>번호</th><th>닉네임</th><th>상태</th><th>응모일시</th></tr></thead><tbody>";
+        data.rows.forEach(function (r) {
+          html += "<tr><td>" + (PRODUCT_LABELS[r.product] || r.product) + "</td><td>" + r.ball_number + "</td><td>" +
+            (r.participants ? escapeHtml(r.participants.display_name) : "") + "</td><td>" + badge(r.winner_status) +
+            "</td><td>" + new Date(r.created_at).toLocaleString("ko-KR") + "</td></tr>";
+        });
+        html += "</tbody></table>";
+        document.getElementById("ent-table-wrap").innerHTML = html;
+      }
+
+      var totalPages = Math.max(Math.ceil(data.count / data.pageSize), 1);
+      document.getElementById("ent-page-label").textContent = entPage + " / " + totalPages + " (총 " + data.count + "건)";
+      document.getElementById("ent-prev").disabled = entPage <= 1;
+      document.getElementById("ent-next").disabled = entPage >= totalPages;
+    } catch (err) {
+      flash("err", err.message);
+    }
+  }
+  document.getElementById("ent-prev").addEventListener("click", function () { entPage = Math.max(entPage - 1, 1); loadEntries(); });
+  document.getElementById("ent-next").addEventListener("click", function () { entPage += 1; loadEntries(); });
+  document.getElementById("ent-filter-product").addEventListener("change", function () { entPage = 1; loadEntries(); });
+  document.getElementById("ent-filter-status").addEventListener("change", function () { entPage = 1; loadEntries(); });
+
+  function escapeHtml(s) {
+    if (s == null) return "";
+    return String(s).replace(/[&<>"']/g, function (c) {
+      return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
+    });
+  }
+
+  // ---------- draw ----------
+  document.getElementById("draw-run-btn").addEventListener("click", async function () {
+    var winnerCount = parseInt(document.getElementById("draw-winner-count").value, 10) || 0;
+    var reserveCount = parseInt(document.getElementById("draw-reserve-count").value, 10) || 0;
+    if (!confirm(winnerCount + "명 당첨 + " + reserveCount + "명 예비를 추첨합니다. 계속할까요?")) return;
+    try {
+      var res = await adminFetch("/admin-draw", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ winner_count: winnerCount, reserve_count: reserveCount }),
+      });
+      var data = await res.json();
+      if (!res.ok) throw new Error(data.error || "추첨 실패");
+
+      var html = "<h2>당첨 (" + data.winners.length + "명)</h2><table><tbody>";
+      data.winners.forEach(function (w) {
+        html += "<tr><td>" + (PRODUCT_LABELS[w.product] || w.product) + "</td><td>No." + w.ball_number + "</td></tr>";
+      });
+      html += "</tbody></table><h2 style='margin-top:14px'>예비 (" + data.reserves.length + "명)</h2><table><tbody>";
+      data.reserves.forEach(function (w) {
+        html += "<tr><td>" + (PRODUCT_LABELS[w.product] || w.product) + "</td><td>No." + w.ball_number + "</td></tr>";
+      });
+      html += "</tbody></table>";
+      document.getElementById("draw-result").innerHTML = html;
+      flash("ok", "추첨이 완료되었습니다.");
+    } catch (err) {
+      flash("err", err.message);
+    }
+  });
+
+  // ---------- review + promote ----------
+  async function loadReview() {
+    try {
+      var winnerRes = await adminFetch("/admin-entries?winner_status=winner&pageSize=100");
+      var winnerData = await winnerRes.json();
+      if (!winnerRes.ok) throw new Error(winnerData.error || "불러오기 실패");
+      renderReviewTable(winnerData.rows);
+
+      var reserveRes = await adminFetch("/admin-entries?winner_status=reserve&pageSize=100");
+      var reserveData = await reserveRes.json();
+      if (!reserveRes.ok) throw new Error(reserveData.error || "불러오기 실패");
+      renderReserveTable(reserveData.rows);
+    } catch (err) {
+      flash("err", err.message);
+    }
+  }
+
+  function renderReviewTable(rows) {
+    var wrap = document.getElementById("review-table-wrap");
+    if (!rows.length) {
+      wrap.innerHTML = '<div class="empty">검수 대기 중인 당첨자가 없습니다</div>';
+      return;
+    }
+    var html = "<table><thead><tr><th>제품</th><th>번호</th><th>닉네임</th><th>카드사진</th><th>처리</th></tr></thead><tbody>";
+    rows.forEach(function (r) {
+      var photos = "";
+      if (r.card_photo_front_url) photos += '<img class="thumb" src="' + r.card_photo_front_url + '" onclick="window.open(this.src)">';
+      if (r.card_photo_back_url) photos += '<img class="thumb" src="' + r.card_photo_back_url + '" onclick="window.open(this.src)">';
+      if (!photos) photos = '<span style="color:#a68a85;font-size:12px">미제출</span>';
+      html += "<tr><td>" + (PRODUCT_LABELS[r.product] || r.product) + "</td><td>No." + r.ball_number + "</td><td>" +
+        escapeHtml(r.participants ? r.participants.display_name : "") + "</td><td>" + photos +
+        '</td><td class="row-actions"><button class="btn btn-sm" data-approve="' + r.id + '">승인</button>' +
+        '<button class="btn btn-sm btn-ghost" data-invalidate="' + r.id + '">무효</button></td></tr>';
+    });
+    html += "</tbody></table>";
+    wrap.innerHTML = html;
+
+    wrap.querySelectorAll("[data-approve]").forEach(function (btn) {
+      btn.addEventListener("click", function () { reviewCard(btn.dataset.approve, "approve"); });
+    });
+    wrap.querySelectorAll("[data-invalidate]").forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        var reason = prompt("무효 사유를 입력하세요");
+        if (reason) reviewCard(btn.dataset.invalidate, "invalidate", reason);
+      });
+    });
+  }
+
+  async function reviewCard(entryId, action, reason) {
+    try {
+      var res = await adminFetch("/admin-review-card", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ entry_id: entryId, action: action, invalid_reason: reason }),
+      });
+      var data = await res.json();
+      if (!res.ok) throw new Error(data.error || "처리 실패");
+      flash("ok", action === "approve" ? "승인되었습니다." : "무효 처리되었습니다.");
+      loadReview();
+    } catch (err) {
+      flash("err", err.message);
+    }
+  }
+
+  function renderReserveTable(rows) {
+    var wrap = document.getElementById("reserve-table-wrap");
+    if (!rows.length) {
+      wrap.innerHTML = '<div class="empty">예비 당첨자가 없습니다</div>';
+      return;
+    }
+    var html = "<table><thead><tr><th>제품</th><th>번호</th><th>닉네임</th><th>처리</th></tr></thead><tbody>";
+    rows.forEach(function (r) {
+      html += "<tr><td>" + (PRODUCT_LABELS[r.product] || r.product) + "</td><td>No." + r.ball_number + "</td><td>" +
+        escapeHtml(r.participants ? r.participants.display_name : "") +
+        '</td><td><button class="btn btn-sm" data-promote="' + r.id + '">당첨으로 승격</button></td></tr>';
+    });
+    html += "</tbody></table>";
+    wrap.innerHTML = html;
+
+    wrap.querySelectorAll("[data-promote]").forEach(function (btn) {
+      btn.addEventListener("click", async function () {
+        if (!confirm("이 예비 당첨자를 당첨으로 승격할까요?")) return;
+        try {
+          var res = await adminFetch("/admin-promote-reserve", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ entry_id: btn.dataset.promote }),
+          });
+          var data = await res.json();
+          if (!res.ok) throw new Error(data.error || "승격 실패");
+          flash("ok", "승격되었습니다.");
+          loadReview();
+        } catch (err) {
+          flash("err", err.message);
+        }
+      });
+    });
+  }
+
+  // ---------- shipping export ----------
+  document.getElementById("shipping-export-btn").addEventListener("click", async function (e) {
+    e.preventDefault();
+    try {
+      var s = getSession();
+      var res = await fetch(cfg.FUNCTIONS_URL + "/admin-shipping-export", {
+        headers: { Authorization: "Bearer " + s.access_token },
+      });
+      if (!res.ok) throw new Error("다운로드 실패");
+      var blob = await res.blob();
+      var url = URL.createObjectURL(blob);
+      var a = document.createElement("a");
+      a.href = url;
+      a.download = "shipping_export.csv";
+      a.click();
+      URL.revokeObjectURL(url);
+    } catch (err) {
+      flash("err", err.message);
+    }
+  });
+
+  // ---------- init ----------
+  function initApp() {
+    loadDashboard();
+  }
+
+  if (getSession()) {
+    showApp();
+    initApp();
+  } else {
+    showLogin();
+  }
+})();
+</script>
+</body>
+</html>
