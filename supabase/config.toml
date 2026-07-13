@@ -371,6 +371,9 @@ authorization_url_path = "/oauth/consent"
 # Allow dynamic client registration
 allow_dynamic_registration = false
 
+[functions.public-event-info]
+verify_jwt = false
+
 [functions.line-login]
 verify_jwt = false
 
