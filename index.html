@@ -49,7 +49,7 @@
   <div class="wrap">
     <div class="hero">
       <img class="hero-img" src="images/hero.jpg" alt="SUMUADI">
-      <h1>POP-UP<br>ガチャイベント</h1>
+      <h1>SEONGSU JAPAN<br>先行サンプリング参加者限定<br>抽選キャンペーン</h1>
       <div id="cta-area">
         <div class="soon">読み込み中…</div>
       </div>
@@ -60,11 +60,11 @@
       <div class="steps">
         <div class="step"><span class="n">1</span>届いたガチャカプセルを開ける</div>
         <div class="step"><span class="n">2</span>QRコードからSUMUADI公式LINEを友だち追加</div>
-        <div class="step"><span class="n">3</span>カプセルの番号カードで応募（届いたサンプルの種類と番号を入力するだけ！）</div>
+        <div class="step"><span class="n">3</span>カプセルの抽選応募券で応募（届いたサンプルの種類と番号を入力するだけ！）</div>
         <div class="step"><span class="n">4</span>発表日に当選結果をチェック！</div>
       </div>
       <p class="prize-note">※STEP3では、お好みの商品ではなく<strong>カプセルに入っていたサンプルと同じ種類</strong>を選んでください</p>
-      <p class="prize-note">※当選時には番号カードの写真提出（本人確認）が必要です。<strong>番号カードは絶対に捨てず</strong>、発表まで大切に保管してください</p>
+      <p class="prize-note">※当選時には抽選応募券の写真提出（本人確認）が必要です。<strong>抽選応募券は絶対に捨てず</strong>、発表まで大切に保管してください</p>
     </div>
 
     <div class="card">
@@ -82,9 +82,8 @@
     </div>
 
     <div class="card">
-      <h2>応募期間・当選発表日</h2>
+      <h2>当選発表日</h2>
       <dl class="kv" id="period-info">
-        <dt>応募期間</dt><dd id="period-entry">-</dd>
         <dt>当選発表</dt><dd id="period-announce">-</dd>
       </dl>
     </div>
@@ -98,9 +97,9 @@
       <h2>注意事項</h2>
       <ul class="terms">
         <li>応募にはSUMUADI公式LINEの友だち追加が必要です</li>
-        <li>ご応募はお一人様1回限りです（応募期間中は内容の修正が可能です）</li>
-        <li>番号カードは当選時の確認に必要です。当選発表まで大切に保管してください</li>
-        <li>当選された方は、番号カードの写真と配送先のご提出が必要です</li>
+        <li>ご応募はお一人様1回限りです。応募期間中は、応募内容を修正できます</li>
+        <li>抽選応募券は当選確認の際に必要です。大切に保管してください</li>
+        <li>当選された方は、抽選応募券の写真と配送先のご提出が必要です</li>
         <li>当選発表は本ページ・LINEにてご確認いただけます</li>
         <li>提出期限を過ぎた場合、当選は無効となります</li>
         <li>不正応募と判断された場合、当選を取り消すことがあります</li>
@@ -137,8 +136,6 @@
         var entryStart = data.entry_start ? new Date(data.entry_start) : null;
         var entryEnd = data.entry_end ? new Date(data.entry_end) : null;
 
-        document.getElementById("period-entry").textContent =
-          entryStart && entryEnd ? formatDateJP(data.entry_start) + " 〜 " + formatDateJP(data.entry_end) : "近日公開";
         document.getElementById("period-announce").textContent =
           data.announce_at ? formatDateJP(data.announce_at) + "予定" : "近日公開";
 

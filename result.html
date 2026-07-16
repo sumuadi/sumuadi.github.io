@@ -40,7 +40,7 @@
 <body>
   <div class="box">
     <img class="brand-logo" src="images/logo.png" alt="SUMUADI">
-    <h1>当選結果確認</h1>
+    <h1>当選結果の確認</h1>
 
     <div id="loading" class="loading">読み込み中…</div>
 
@@ -129,9 +129,9 @@
           '<div class="result-summary">' + summary + '</div>';
         if (status === "winner") {
           html +=
-            '<p class="result-desc">番号カードの写真と配送先情報のご提出をお願いいたします。' +
-            (data.submit_deadline ? "（" + formatDateJP(data.submit_deadline) + "まで）" : "") + '</p>' +
-            '<a class="btn" href="shipping.html">配送先を入力する</a>';
+            '<p class="result-desc">抽選応募券の写真と配送先情報を' +
+            (data.submit_deadline ? formatDateJP(data.submit_deadline) + "までに" : "") + 'ご提出ください。</p>' +
+            '<a class="btn" href="shipping.html">配送先情報を入力する</a>';
         } else {
           html +=
             '<p class="result-desc">ご提出いただいた内容の確認が完了しています。<br>発送までしばらくお待ちください。</p>' +
@@ -144,12 +144,12 @@
           '<div class="card"><div class="icon">😢</div>' +
           '<div class="result-title lose">今回は当選が無効となりました</div>' +
           '<div class="result-summary">' + summary + '</div>' +
-          '<p class="result-desc">番号カードの確認ができなかった、または期限までにご提出がなかったため、当選が無効となりました。<br>ご不明点は公式LINEまでお問い合わせください。</p></div>';
+          '<p class="result-desc">抽選応募券の確認ができなかった、または期限までにご提出がなかったため、当選が無効となりました。<br>ご不明点は公式LINEまでお問い合わせください。</p></div>';
       } else {
         // status === 'none'
         area.innerHTML =
           '<div class="card"><div class="icon">😢</div>' +
-          '<div class="result-title lose">残念ながら今回は当選されませんでした…</div>' +
+          '<div class="result-title lose">残念ながら、今回はご当選となりませんでした。</div>' +
           '<div class="result-summary">' + summary + '</div>' +
           '<p class="result-desc">またの機会をお楽しみに。<br>SUMUADI製品はQoo10でもお買い求めいただけます。</p></div>';
       }

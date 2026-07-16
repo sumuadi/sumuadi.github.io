@@ -60,7 +60,7 @@
 <body>
   <div class="box">
     <img class="brand-logo" src="images/logo.png" alt="SUMUADI">
-    <h1 id="page-title">ガチャ番号で応募する</h1>
+    <h1 id="page-title">抽選番号を入力して応募</h1>
     <div class="edit-note" id="edit-note">すでに応募済みです。内容を修正できます。</div>
 
     <div id="loading" class="loading">読み込み中…</div>
@@ -88,8 +88,8 @@
       </div>
 
       <div class="card">
-        <label class="field-label" for="ball_number">② ガチャ番号</label>
-        <input type="number" id="ball_number" name="ball_number" inputmode="numeric" placeholder="番号カードに記載の番号" required>
+        <label class="field-label" for="ball_number">② 抽選番号</label>
+        <input type="number" id="ball_number" name="ball_number" inputmode="numeric" placeholder="抽選応募券に記載の番号" required>
         <div class="hint" id="range-hint">商品を選択すると入力できる番号の範囲が表示されます</div>
       </div>
 
@@ -102,9 +102,9 @@
         <label class="agree">
           <input type="checkbox" id="agree" required>
           <span>
-            <a href="privacy.html" target="_blank" style="color:#6b4fa0">プライバシーポリシー</a>に同意の上、
-            個人情報の取扱いに同意します。<br>
-            番号カードは当選時の確認に必要です。当選発表まで大切に保管してください。
+            <a href="privacy.html" target="_blank" style="color:#6b4fa0">プライバシーポリシー</a>を確認の上、
+            個人情報の取り扱いに同意します。<br>
+            抽選応募券は当選確認の際に必要です。大切に保管してください。
           </span>
         </label>
       </div>
@@ -112,17 +112,17 @@
       <button type="submit" class="submit" id="submit-btn">応募する</button>
     </form>
 
-    <p class="center-note">ご応募はお一人様1回限りです（応募期間中は内容の修正が可能です）</p>
+    <p class="center-note">ご応募はお一人様1回限りです。応募期間中は、応募内容を修正できます。</p>
   </div>
 
   <div class="modal-overlay" id="confirm-modal">
     <div class="modal">
-      <h2>番号カードに記載の商品と一致していますか？</h2>
+      <h2>抽選応募券の内容と一致していますか？</h2>
       <div class="confirm-summary" id="confirm-summary"></div>
-      <p>手元のガチャ番号カードと、商品・番号が合っているか<br>もう一度ご確認ください。</p>
+      <p>お手元の抽選応募券と、商品名・抽選番号が一致しているか<br>もう一度ご確認ください。</p>
       <div class="modal-actions">
         <button class="submit" id="confirm-yes">はい、応募する</button>
-        <button class="cancel" id="confirm-no">確認し直す</button>
+        <button class="cancel" id="confirm-no">入力内容を修正する</button>
       </div>
     </div>
   </div>
@@ -159,7 +159,7 @@
       });
       numberInput.min = 1;
       numberInput.max = PRODUCT_MAX[product];
-      rangeHint.textContent = "1〜" + PRODUCT_MAX[product] + " の範囲で入力してください";
+      rangeHint.textContent = "1〜" + PRODUCT_MAX[product] + "の範囲で入力してください";
     }
 
     document.querySelectorAll(".product").forEach(function (el) {

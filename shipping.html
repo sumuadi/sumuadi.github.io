@@ -54,19 +54,19 @@
 
     <form id="shipping-form" class="hidden" style="display:none">
       <div id="error-box" class="error"></div>
-      <div id="ok-box" class="ok-msg">配送先情報を受け付けました。内容は下記より修正できます。</div>
+      <div id="ok-box" class="ok-msg">送信が完了しました。内容は以下から修正できます。</div>
 
       <div class="card">
-        <h2>① 番号カードの写真</h2>
+        <h2>① 抽選応募券の写真</h2>
         <div class="upload-slot" id="slot-photo">
           <div class="label">写真を選択</div>
           <input type="file" accept="image/*" id="file-photo">
         </div>
-        <div class="hint">番号がはっきり見えるように撮影してください。<br>本人確認のため、追加の写真提出をお願いする場合があります。</div>
+        <div class="hint">商品名と抽選番号がはっきり見える写真をアップロードしてください。<br>本人確認のため、追加の写真提出をお願いする場合があります。</div>
       </div>
 
       <div class="card">
-        <h2>② 配送先情報（EMS国際発送）</h2>
+        <h2>② 配送先情報（EMSでの国際発送）</h2>
 
         <label class="field-label" for="name_kanji">お名前（漢字）</label>
         <input type="text" id="name_kanji" required>
@@ -102,7 +102,7 @@
         </div>
       </div>
 
-      <button type="submit" class="submit" id="submit-btn">配送先情報を送信する</button>
+      <button type="submit" class="submit" id="submit-btn">入力内容を送信する</button>
     </form>
 
     <a class="back-link" href="result.html">結果ページに戻る</a>
@@ -272,7 +272,7 @@
       errorBox.style.display = "none";
 
       if (!uploadedPhoto) {
-        showError("番号カードの写真をアップロードしてください。");
+        showError("抽選応募券の写真をアップロードしてください。");
         return;
       }
 
