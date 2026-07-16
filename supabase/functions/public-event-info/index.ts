@@ -1,6 +1,6 @@
 // GET /public-event-info — no auth required. Returns only the fields safe to show on the
-// public landing page (dates + announce flag), so index.html can render the right CTA state
-// (before entry / open for entry / entry closed / announced) without needing a login first.
+// public landing page (dates + announce flag + winner_count), so index.html can render the
+// right CTA state and prize copy without needing a login first.
 import { corsHeadersFor, handleOptions } from "../_shared/cors.ts";
 import { json } from "../_shared/http.ts";
 import { getServiceClient } from "../_shared/supabaseAdmin.ts";
@@ -17,7 +17,7 @@ Deno.serve(async (req) => {
   const supabase = getServiceClient();
   const { data, error } = await supabase
     .from("event_config")
-    .select("event_name, entry_start, entry_end, announce_at, is_announced")
+    .select("event_name, entry_start, entry_end, announce_at, is_announced, winner_count")
     .eq("id", 1)
     .single();
 

@@ -8,7 +8,7 @@
   *{margin:0;padding:0;box-sizing:border-box}
   body{font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif;
     background:linear-gradient(160deg,#ddc5fb 0%,#c7a3f5 55%,#9b7ae0 100%);
-    color:#3d3550}
+    color:#3d3550;text-wrap:pretty}
   .wrap{max-width:460px;margin:0 auto;padding:24px 20px 60px}
 
   /* hero */
@@ -37,6 +37,11 @@
   .prize-products img{width:100%;border-radius:12px}
   .prize-products div{flex:1}
   .prize-note{font-size:12px;color:#9088a8;margin-top:4px}
+  .prize-highlight{background:linear-gradient(160deg,#a480e6,#9b7ae0);border-radius:16px;
+    padding:20px;text-align:center;color:#fff;box-shadow:0 6px 16px rgba(155,122,224,.35)}
+  .prize-highlight-value{font-size:26px;font-weight:bold;text-shadow:0 2px 8px rgba(0,0,0,.1)}
+  .prize-highlight-desc{font-size:14.5px;margin-top:8px;line-height:1.7}
+  .prize-highlight-desc strong{font-size:18px}
   p.desc{font-size:13.5px;line-height:1.9;color:#463a5c}
   .kv{display:grid;grid-template-columns:88px 1fr;gap:8px 0;font-size:13.5px;line-height:1.9}
   .kv dt{color:#8a6a9a;font-weight:bold}
@@ -74,11 +79,10 @@
         <div><img src="images/cream.png" alt="クリーム"></div>
         <div><img src="images/serum.jpg" alt="セラム"></div>
       </div>
-      <p class="desc">
-        抽選で当選された方には、応募いただいた商品の正規サイズ品（参考価格4,000円台〜相当）を、
-        SUMUADIより韓国からEMS（国際スピード郵便）にて直接お届けします。
-      </p>
-      <p class="prize-note">※価格は参考価格であり、実際の販売価格と異なる場合があります</p>
+      <div class="prize-highlight">
+        <div class="prize-highlight-value">🎁 12,000円相当</div>
+        <div class="prize-highlight-desc">SUMUADI製品セットを<br><strong id="prize-count">10</strong>名様にプレゼント！✨</div>
+      </div>
     </div>
 
     <div class="card">
@@ -138,6 +142,10 @@
 
         document.getElementById("period-announce").textContent =
           data.announce_at ? formatDateJP(data.announce_at) + "予定" : "近日公開";
+
+        if (data.winner_count) {
+          document.getElementById("prize-count").textContent = data.winner_count;
+        }
 
         if (data.is_announced) {
           renderCta("active", "当選結果を確認する", cfg.FUNCTIONS_URL + "/line-login?next=result");
