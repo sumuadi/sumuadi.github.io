@@ -12,15 +12,18 @@
 
   /* login */
   #login-view{min-height:100vh;display:flex;align-items:center;justify-content:center;
-    background:linear-gradient(160deg,#f9d9d3 0%,#f3b8ae 55%,#e8837b 100%)}
+    background:linear-gradient(160deg,#ddc5fb 0%,#c7a3f5 55%,#9b7ae0 100%)}
   .login-box{background:#fff;border-radius:20px;padding:36px 32px;width:100%;max-width:340px;
     box-shadow:0 10px 30px rgba(0,0,0,.15)}
-  .login-box h1{font-size:16px;letter-spacing:3px;color:#d96a61;font-weight:bold;margin-bottom:24px;text-align:center}
+  .login-box h1{font-size:15px;letter-spacing:2px;color:#8a63d6;font-weight:bold;margin-bottom:24px;text-align:center}
+  .login-box .logo{height:18px;display:block;margin:0 auto 10px}
+  header .logo{height:16px;display:block}
+  header .brand{display:flex;align-items:center;gap:10px}
   .field{margin-bottom:14px}
-  .field label{display:block;font-size:12.5px;color:#8a6a64;margin-bottom:6px;font-weight:bold}
-  .field input{width:100%;padding:11px 12px;border-radius:10px;border:1.5px solid #eaddda;font-size:14px}
-  .field input:focus{outline:none;border-color:#e8837b}
-  .btn{background:linear-gradient(160deg,#f3b8ae,#e8837b);color:#fff;font-weight:bold;
+  .field label{display:block;font-size:12.5px;color:#79688f;margin-bottom:6px;font-weight:bold}
+  .field input{width:100%;padding:11px 12px;border-radius:10px;border:1.5px solid #e0d6f5;font-size:14px}
+  .field input:focus{outline:none;border-color:#9b7ae0}
+  .btn{background:linear-gradient(160deg,#a480e6,#9b7ae0);color:#fff;font-weight:bold;
     border:none;border-radius:10px;padding:12px;font-size:14px;cursor:pointer;width:100%}
   .btn:disabled{opacity:.5;cursor:default}
   .btn-ghost{background:#fff;color:#c14a3f;border:1.5px solid #f1d0cb}
@@ -30,23 +33,23 @@
   /* app shell */
   #app-view{max-width:1080px;margin:0 auto;padding:20px 20px 60px}
   header{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;flex-wrap:wrap;gap:10px}
-  header h1{font-size:18px;color:#d96a61;letter-spacing:2px}
-  header .who{font-size:12.5px;color:#8a6a64}
+  header h1{font-size:18px;color:#8a63d6;letter-spacing:2px}
+  header .who{font-size:12.5px;color:#79688f}
   nav{display:flex;gap:6px;margin-bottom:20px;flex-wrap:wrap}
-  nav button{background:#fff;border:1.5px solid #eaddda;border-radius:20px;padding:8px 16px;
-    font-size:13px;cursor:pointer;color:#6b4b46}
-  nav button.active{background:#e8837b;color:#fff;border-color:#e8837b}
+  nav button{background:#fff;border:1.5px solid #e0d6f5;border-radius:20px;padding:8px 16px;
+    font-size:13px;cursor:pointer;color:#6b5a80}
+  nav button.active{background:#9b7ae0;color:#fff;border-color:#9b7ae0}
   .panel{display:none}
   .panel.active{display:block}
   .card{background:#fff;border-radius:16px;padding:20px;margin-bottom:16px;box-shadow:0 2px 10px rgba(0,0,0,.05)}
-  .card h2{font-size:14px;color:#a24b42;margin-bottom:14px}
+  .card h2{font-size:14px;color:#6b4fa0;margin-bottom:14px}
   .grid-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px}
   .stat{background:#fff7f6;border-radius:12px;padding:14px;text-align:center}
-  .stat .n{font-size:22px;font-weight:bold;color:#d96a61}
-  .stat .l{font-size:11.5px;color:#8a6a64;margin-top:4px}
+  .stat .n{font-size:22px;font-weight:bold;color:#8a63d6}
+  .stat .l{font-size:11.5px;color:#79688f;margin-top:4px}
   table{width:100%;border-collapse:collapse;font-size:13px}
   th,td{text-align:left;padding:8px 10px;border-bottom:1px solid #f1e6e3}
-  th{color:#8a6a64;font-weight:bold;font-size:12px}
+  th{color:#79688f;font-weight:bold;font-size:12px}
   .badge{display:inline-block;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:bold}
   .badge-none{background:#eee;color:#777}
   .badge-winner{background:#fff1c9;color:#a67c00}
@@ -55,20 +58,21 @@
   .row-actions{display:flex;gap:6px}
   .field-row{display:flex;gap:10px;flex-wrap:wrap}
   .field-row .field{flex:1;min-width:140px}
-  select{width:100%;padding:11px 12px;border-radius:10px;border:1.5px solid #eaddda;font-size:14px}
+  select{width:100%;padding:11px 12px;border-radius:10px;border:1.5px solid #e0d6f5;font-size:14px}
   .thumb{width:52px;height:52px;object-fit:cover;border-radius:8px;cursor:pointer}
   .msg{font-size:12.5px;padding:10px 12px;border-radius:8px;margin-bottom:12px;display:none}
   .msg-ok{background:#dff5e3;color:#2f8a4a}
   .msg-err{background:#fde0dd;color:#c14a3f}
   .pager{display:flex;gap:8px;align-items:center;margin-top:12px;font-size:13px}
-  .empty{color:#a68a85;font-size:13px;padding:16px 0;text-align:center}
+  .empty{color:#9088a8;font-size:13px;padding:16px 0;text-align:center}
 </style>
 </head>
 <body>
 
 <div id="login-view">
   <div class="login-box">
-    <h1>SUMUADI 관리자</h1>
+    <img class="logo" src="images/logo.png" alt="SUMUADI">
+    <h1>관리자</h1>
     <form id="login-form">
       <div class="field">
         <label for="email">이메일</label>
@@ -86,7 +90,10 @@
 
 <div id="app-view" class="hidden">
   <header>
-    <h1>SUMUADI 관리자</h1>
+    <div class="brand">
+      <img class="logo" src="images/logo.png" alt="SUMUADI">
+      <h1>관리자</h1>
+    </div>
     <div>
       <span class="who" id="who-label"></span>
       <button class="btn btn-ghost btn-sm" id="logout-btn" style="margin-left:10px">로그아웃</button>
@@ -164,22 +171,22 @@
 
     <div class="card">
       <h2>발표 상태</h2>
-      <p style="font-size:13px;color:#6b4b46;margin-bottom:12px" id="cfg-announce-status">-</p>
+      <p style="font-size:13px;color:#6b5a80;margin-bottom:12px" id="cfg-announce-status">-</p>
       <button class="btn btn-sm" id="cfg-announce-toggle-btn">발표 ON</button>
-      <p style="font-size:11.5px;color:#a68a85;margin-top:10px">
+      <p style="font-size:11.5px;color:#9088a8;margin-top:10px">
         발표 ON 시 result.html이 활성화되어 참여자가 결과를 조회할 수 있습니다. (LINE 메시지는 발송되지 않음)
       </p>
     </div>
 
     <div class="card">
       <h2>LINE 알림 발송</h2>
-      <p style="font-size:12.5px;color:#a68a85;margin-bottom:12px">
+      <p style="font-size:12.5px;color:#9088a8;margin-bottom:12px">
         당첨자(winner 상태) 전원에게 개별 당첨 안내 push를 보내고, 공식 계정 전체 친구에게 발표 공지를 broadcast합니다.
         <strong style="color:#c14a3f">실제 LINE 메시지가 발송되며 되돌릴 수 없습니다. 발표 ON 상태에서만 가능합니다.</strong>
         같은 버튼을 두 번 누르면 아직 검수 전인 당첨자에게 중복 발송될 수 있으니 주의하세요.
       </p>
       <button class="btn btn-sm btn-ghost" id="send-announcement-btn">당첨자 알림 + 전체 공지 발송</button>
-      <div id="announcement-result" style="margin-top:12px;font-size:12.5px;color:#6b4b46"></div>
+      <div id="announcement-result" style="margin-top:12px;font-size:12.5px;color:#6b5a80"></div>
     </div>
   </section>
 
@@ -221,7 +228,7 @@
   <section class="panel" id="panel-draw">
     <div class="card">
       <h2>추첨 실행</h2>
-      <p style="font-size:12.5px;color:#a68a85;margin-bottom:12px">
+      <p style="font-size:12.5px;color:#9088a8;margin-bottom:12px">
         winner_status가 '미추첨(none)'인 응모 중에서만 추첨합니다. 이미 당첨으로 뽑힌 건은 건드리지 않습니다.
         예비 당첨자는 없습니다 — 무효 처리된 당첨은 그대로 종료됩니다.
       </p>
@@ -248,7 +255,7 @@
   <section class="panel" id="panel-shipping">
     <div class="card">
       <h2>배송 정보</h2>
-      <p style="font-size:12.5px;color:#a68a85;margin-bottom:14px">
+      <p style="font-size:12.5px;color:#9088a8;margin-bottom:14px">
         당첨자가 제출한 배송 정보 목록입니다. CSV로 내려받아 EMS 라벨 작성에 사용하거나, 발송 후 여기서 발송완료 처리하세요.
       </p>
       <a class="btn btn-sm" id="shipping-export-btn" style="display:inline-block;text-decoration:none;text-align:center">CSV 다운로드</a>
@@ -644,7 +651,7 @@
     rows.forEach(function (r) {
       var photos = "";
       if (r.card_photo_url) photos += '<img class="thumb" src="' + r.card_photo_url + '" onclick="window.open(this.src)">';
-      if (!photos) photos = '<span style="color:#a68a85;font-size:12px">미제출</span>';
+      if (!photos) photos = '<span style="color:#9088a8;font-size:12px">미제출</span>';
       html += "<tr><td>" + (PRODUCT_LABELS[r.product] || r.product) + "</td><td>No." + r.ball_number + "</td><td>" +
         escapeHtml(r.participants ? r.participants.display_name : "") + "</td><td>" + photos +
         '</td><td class="row-actions"><button class="btn btn-sm" data-approve="' + r.id + '">승인</button>' +
