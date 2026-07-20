@@ -24,7 +24,7 @@
   .product{border:2px solid #e4d9f9;border-radius:14px;padding:8px;text-align:center;
     cursor:pointer;transition:.15s}
   .product img{width:100%;aspect-ratio:1;object-fit:cover;border-radius:10px;margin-bottom:6px}
-  .product span{font-size:12px;font-weight:bold}
+  .product span{font-size:12px;font-weight:bold;white-space:nowrap}
   .product.selected{border-color:#9b7ae0;background:#f5eeff}
   input[type=number],input[type=text]{width:100%;padding:13px 14px;border-radius:12px;
     border:2px solid #e4d9f9;font-size:16px;margin-top:10px}
@@ -73,7 +73,7 @@
         <div class="products">
           <div class="product" data-product="toner" data-max="400">
             <img src="images/toner.png" alt="アンプルトナー">
-            <span>アンプル<br>トナー</span>
+            <span>アンプルトナー</span>
           </div>
           <div class="product" data-product="cream" data-max="300">
             <img src="images/cream.png" alt="クリーム">
